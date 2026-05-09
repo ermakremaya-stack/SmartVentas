@@ -17,7 +17,6 @@ const ModalRegistroCategoria = ({
     setDeshabilitado(false);
   };
 
-  // El return debe estar DENTRO de la función del componente
   return (
     <Modal
       show={mostrarModal}
@@ -36,7 +35,7 @@ const ModalRegistroCategoria = ({
             <Form.Control
               type="text"
               name="nombre_categoria"
-              value={nuevaCategoria.nombre_categoria}
+              value={nuevaCategoria?.nombre_categoria || ""}
               onChange={manejoCambioInput}
               placeholder="Ingresa el nombre"
             />
@@ -47,7 +46,7 @@ const ModalRegistroCategoria = ({
               as="textarea"
               rows={3}
               name="descripcion_categoria"
-              value={nuevaCategoria.descripcion_categoria}
+              value={nuevaCategoria?.descripcion_categoria || ""}
               onChange={manejoCambioInput}
               placeholder="Ingresa la descripción"
             />
@@ -61,13 +60,15 @@ const ModalRegistroCategoria = ({
         <Button
           variant="primary"
           onClick={handleRegistrar}
-          disabled={nuevaCategoria.nombre_categoria.trim() === "" || deshabilitado}
+          
+          disabled={!nuevaCategoria?.nombre_categoria?.trim() || deshabilitado}
         >
           Guardar
         </Button>
       </Modal.Footer>
     </Modal>
-  ); // Cerramos el return con paréntesis, no con llaves
-}; // Aquí cerramos finalmente el componente
+  ); 
+}; 
+
 
 export default ModalRegistroCategoria;
