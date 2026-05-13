@@ -104,6 +104,14 @@ const Encabezado = () => {
               <strong>Catálogo</strong>
             </Nav.Link>
 
+            <Nav.Link
+              onClick={() => manejarNavegacion("/empleados")}
+              className={mostrarMenu ? "color-texto-marca" : "text-white"}
+            >
+              {mostrarMenu ? <i className="bi-people-fill me-2"></i> : null}
+              <strong>Empleados</strong>
+            </Nav.Link>
+
             {/* Ícono cerrar sesión en barra superior */}
             {mostrarMenu ? null : (
               <Nav.Link
