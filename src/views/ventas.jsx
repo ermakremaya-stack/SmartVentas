@@ -1,0 +1,234 @@
+// src/views/Ventas.jsx
+import React, { useState, useEffect } from "react";
+import { Container, Row, Col, Button, Spinner } from "react-bootstrap";
+import { useVentas } from "../components/hooks/useVentas";
+
+import NotificacionOperacion from "../components/NotificationOperation";
+import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
+import Paginacion from "../components/ornedamiento/Paginacion";
+import TablaVentas from "../components/ventas/TablaVentas";
+import TarjetaVenta from "../components/ventas/TarjetaVenta";
+import FormularioVenta from "../components/ventas/FormularioVenta"; // <-- CAMBIO: Único formulario importado
+
+const Ventas = () => {
+  const {
+    ventas,
+    cargando,
+    clientes,
+    empleados,
+    productos,
+    toast,
+    setToast,
+    procesarGuardarVenta
+  } = useVentas();
+
+  // Estados locales de control de la UI
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [ventaAEditar, setVentaAEditar] = useState(null);
+
+  const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
+  const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState(null);
+  const [metodoPago, setMetodoPago] = useState("efectivo");
+  const [detalles, setDetalles] = useState([]);
+  const [totalGeneral, setTotalGeneral] = useState(0);
+
+  const [textoBusqueda, setTextoBusqueda] = useState("");
+  const [ventasFiltradas, setVentasFiltradas] = useState([]);
+  const [registrosPorPagina, establecerRegistrosPorPagina] = useState(8);
+  const [paginaActual, establecerPaginaActual] = useState(1);
+
+  // Calcular total automáticamente cuando cambien los items agregados
+  useEffect(() => {
+    const total = detalles.reduce((sum, det) => sum + det.cantidad * det.precio, 0);
+    setTotalGeneral(total);
+  }, [detalles]);
+
+  // Motor de búsquedas reactivo
+  useEffect(() => {
+    if (!textoBusqueda.trim()) {
+      setVentasFiltradas(ventas);
+    } else {
+      const textoLower = textoBusqueda.toLowerCase();
+      const filtradas = ventas.filter(v =>
+        `${v.clientes?.nombre_cliente || ""} ${v.clientes?.apellido_cliente || ""}`.toLowerCase().includes(textoLower) ||
+        `${v.empleados?.nombre_empleado || ""} ${v.empleados?.apellido_empleado || ""}`.toLowerCase().includes(textoLower)
+      );
+      setVentasFiltradas(filtradas);
+    }
+  }, [textoBusqueda, ventas]);
+
+  // Paginación de registros
+  const ventasPaginadas = ventasFiltradas.slice(
+    (paginaActual - 1) * registrosPorPagina,
+    paginaActual * registrosPorPagina
+  );
+
+  const abrirNuevaVenta = () => {
+    resetFormulario();
+    setMostrarFormulario(true);
+  };
+
+  const abrirEdicion = (venta) => {
+    setVentaAEditar(venta);
+    const cliente = clientes.find(c => c.cliente_id === venta.cliente_id);
+    const empleado = empleados.find(e => e.id_empleado === venta.id_empleado);
+
+    setClienteSeleccionado(cliente || null);
+    setEmpleadoSeleccionado(empleado || null);
+    setMetodoPago(venta.metodo_pago || "efectivo");
+
+    if (venta.detalles_ventas?.length > 0) {
+      setDetalles(venta.detalles_ventas.map(d => ({
+        producto_id: d.producto_id,
+        nombre_producto: d.productos?.nombre_producto || "Producto",
+        precio: d.precio_unitario,
+        cantidad: d.cantidad
+      })));
+    } else {
+      setDetalles([]);
+    }
+    setMostrarFormulario(true);
+  };
+
+  const resetFormulario = () => {
+    setClienteSeleccionado(null);
+    setEmpleadoSeleccionado(null);
+    setMetodoPago("efectivo");
+    setDetalles([]);
+    setVentaAEditar(null);
+  };
+
+  // === FUNCIONES DEL CARRITO COMPLETADAS (EVITA EL TRUNCAMIENTO) ===
+  const agregarDetalle = (producto, cantidad) => {
+    if (!producto || !cantidad) return;
+    setDetalles(prev => {
+      const existe = prev.find(d => d.producto_id === producto.producto_id);
+      if (existe) {
+        return prev.map(d =>
+          d.producto_id === producto.producto_id ? { ...d, cantidad: d.cantidad + cantidad } : d
+        );
+      }
+      return [...prev, {
+        producto_id: producto.producto_id,
+        nombre_producto: producto.nombre_producto,
+        precio: producto.precio_venta,
+        cantidad: cantidad
+      }];
+    });
+  };
+
+  const eliminarDetalle = (idProducto) => {
+    setDetalles(prev => prev.filter(d => d.producto_id !== idProducto));
+  };
+
+  const actualizarCantidad = (idProducto, nuevaCantidad) => {
+    if (nuevaCantidad < 1) return;
+    setDetalles(prev => prev.map(d => 
+      d.producto_id === idProducto ? { ...d, cantidad: nuevaCantidad } : d
+    ));
+  };
+
+  const handleGuardarVenta = async () => {
+    if (!clienteSeleccionado || !empleadoSeleccionado) return;
+
+    const datosVenta = {
+      cliente_id: clienteSeleccionado.cliente_id,
+      id_empleado: empleadoSeleccionado.id_empleado,
+      metodo_pago: metodoPago,
+      total: totalGeneral
+    };
+
+    const exito = await procesarGuardarVenta(ventaAEditar, datosVenta, detalles);
+    if (exito) {
+      setMostrarFormulario(false);
+      resetFormulario();
+    }
+  };
+
+  return (
+    <Container fluid className="py-4">
+      <NotificacionOperacion 
+        show={toast.mostrar} 
+        message={toast.mensaje} 
+        type={toast.tipo} 
+        onCerrar={() => setToast({ ...toast, mostrar: false })} 
+      />
+
+      <Row className="mb-4 align-items-center">
+        <Col>
+          <h2 className="text-dark fw-bold mb-0">
+            <i className="bi bi-cash-coin text-primary me-2"></i> Control de Ventas
+          </h2>
+        </Col>
+        <Col className="text-end">
+          <Button variant="primary" onClick={abrirNuevaVenta}>
+            <i className="bi bi-plus-lg me-1"></i> Nueva Venta
+          </Button>
+        </Col>
+      </Row>
+
+      <CuadroBusquedas textoBusqueda={textoBusqueda} 
+        manejarCambioBusqueda={setTextoBusqueda} />
+
+      {cargando ? (
+        <div className="text-center my-5">
+          <Spinner animation="border" variant="primary" />
+          <p className="text-muted mt-2">Cargando registros de ventas...</p>
+        </div>
+      ) : (
+        <>
+          {/* Vista Escritorio */}
+          <div className="d-none d-md-block">
+            <TablaVentas 
+              ventas={ventasPaginadas} 
+              abrirModalEdicion={abrirEdicion} 
+              abrirModalEliminacion={() => {}} // Configura tu modal de borrado aquí
+              generarPDFVenta={() => {}} 
+            />
+          </div>
+
+          {/* Vista Móvil */}
+          <div className="d-md-none">
+            <TarjetaVenta 
+              ventas={ventasPaginadas} 
+              abrirModalEdicion={abrirEdicion} 
+              abrirModalEliminacion={() => {}} 
+              generarPDFVenta={() => {}} 
+            />
+          </div>
+
+          <Paginacion 
+            totalRegistros={ventasFiltradas.length} 
+            registrosPorPagina={registrosPorPagina} 
+            paginaActual={paginaActual} 
+            establecerPaginaActual={establecerPaginaActual} 
+          />
+        </>
+      )}
+
+      {/* COMPONENTE INTERACTIVO MAESTRO */}
+      <FormularioVenta
+        mostrar={mostrarFormulario}
+        setMostrar={setMostrarFormulario}
+        clientes={clientes}
+        empleados={empleados}
+        productos={productos}
+        clienteSeleccionado={clienteSeleccionado}
+        setClienteSeleccionado={setClienteSeleccionado}
+        empleadoSeleccionado={empleadoSeleccionado}
+        setEmpleadoSeleccionado={setEmpleadoSeleccionado}
+        metodoPago={metodoPago}
+        setMetodoPago={setMetodoPago}
+        detalles={detalles}
+        totalGeneral={totalGeneral}
+        agregarDetalle={agregarDetalle}
+        eliminarDetalle={eliminarDetalle}
+        actualizarCantidad={actualizarCantidad}
+        guardarVenta={handleGuardarVenta}
+        ventaAEditar={ventaAEditar}
+      />
+    </Container>
+  );
+};
+
+export default Ventas;
