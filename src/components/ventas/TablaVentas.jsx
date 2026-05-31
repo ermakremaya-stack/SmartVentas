@@ -101,16 +101,6 @@ const TablaVentas = ({
                                 </Button>
 
                                 <Button
-                                    variant="outline-danger"
-                                    size="sm"
-                                    className="me-2"
-                                    onClick={() => abrirModalEliminacion(venta)}
-                                    title="Eliminar Registro"
-                                >
-                                    <i className="bi bi-trash"></i>
-                                </Button>
-
-                                <Button
                                     variant="outline-primary"
                                     size="sm"
                                     onClick={() => generarPDFVenta(venta)}

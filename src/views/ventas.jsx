@@ -182,7 +182,6 @@ const Ventas = () => {
             <TablaVentas 
               ventas={ventasPaginadas} 
               abrirModalEdicion={abrirEdicion} 
-              abrirModalEliminacion={() => {}} // Configura tu modal de borrado aquí
               generarPDFVenta={() => {}} 
             />
           </div>
