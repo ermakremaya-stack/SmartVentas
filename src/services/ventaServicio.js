@@ -1,4 +1,5 @@
 import { supabase } from "../database/supabaseconfig";
+import { handleSupabaseError } from "../components/utils/errors";
 
 /**
  * @typedef {Object} DetalleVenta
@@ -23,31 +24,40 @@ import { supabase } from "../database/supabaseconfig";
 export const ventaServicio = {
   /**
    * Obtiene todas las ventas incluyendo las columnas específicas del cliente relacionado
+   * @returns {Promise<Array>} Lista de ventas formateadas
    */
   async obtenerTodas() {
     const { data, error } = await supabase
-  .from("ventas")
-  .select(`
-    id_venta,
-    cliente_id,
-    id_empleado,
-    fecha_venta,
-    metodo_pago,
-    total,
-    clientes (
-      nombre1,
-      apellido1,
-      cedula
-    )
-  `)
-  .order("id_venta", { ascending: false });
+      .from("ventas")
+      .select(`
+        id_venta,
+        cliente_id,
+        id_empleado,
+        fecha_venta,
+        metodo_pago,
+        total,
+        clientes (
+          nombre1,
+          apellido1,
+          cedula
+        )
+      `)
+      .order("id_venta", { ascending: false });
   
-    if (error) throw error;
+    if (error) {
+      // 2. Traducimos el error crudo
+      const dbError = handleSupabaseError(error);
+      // 3. Imprimimos el mensaje técnico exacto para desarrollo
+      console.error(`[ventaServicio][obtenerTodas] ❌:`, dbError.devMessage);
+      // 4. Lanzamos el error robusto
+      throw dbError;
+    }
     return data || [];
   },
 
   /**
    * Registra una nueva venta en el sistema
+   * @param {Venta} nuevaVenta - Objeto con los datos de la venta a registrar
    */
   async crear(nuevaVenta) {
     const { error } = await supabase
@@ -58,15 +68,19 @@ export const ventaServicio = {
           id_empleado: nuevaVenta.id_empleado,
           metodo_pago: nuevaVenta.metodo_pago ? nuevaVenta.metodo_pago.trim() : "efectivo",
           total: Number(nuevaVenta.total),
-          // fecha_venta se maneja por DEFAULT CURRENT_TIMESTAMP en Postgres
         },
       ]);
 
-    if (error) throw error;
+    if (error) {
+      const dbError = handleSupabaseError(error);
+      console.error(`[ventaServicio][crear] ❌ Falló el registro:`, dbError.devMessage, { dataInput: nuevaVenta });
+      throw dbError;
+    }
   },
 
   /**
    * Actualiza los datos generales de una venta existente
+   * @param {Venta} ventaEditar - Objeto con los datos modificados de la venta
    */
   async actualizar(ventaEditar) {
     const { error } = await supabase
@@ -79,11 +93,16 @@ export const ventaServicio = {
       })
       .eq("id_venta", ventaEditar.id_venta);
 
-    if (error) throw error;
+    if (error) {
+      const dbError = handleSupabaseError(error);
+      console.error(`[ventaServicio][actualizar] ❌ Error en ID ${ventaEditar.id_venta}:`, dbError.devMessage);
+      throw dbError;
+    }
   },
 
   /**
    * Elimina un registro de venta por su identificador primario
+   * @param {number} id_venta - Identificador de la venta
    */
   async eliminar(id_venta) {
     const { error } = await supabase
@@ -91,22 +110,28 @@ export const ventaServicio = {
       .delete()
       .eq("id_venta", id_venta);
 
-    if (error) throw error;
+    if (error) {
+      const dbError = handleSupabaseError(error);
+      console.error(`[ventaServicio][eliminar] ❌ No se pudo borrar el ID ${id_venta}:`, dbError.devMessage);
+      throw dbError;
+    }
   },
 
-
-/**
+  /**
    * TEMPORAL: Obtiene la lista de productos para desbloquear el desarrollo de Ventas
    */
   async obtenerProductosParaVenta() {
     const { data, error } = await supabase
       .from("productos")
-      .select("producto_id, nombre_producto, precio_venta, stock") // Ajusta los nombres a tu DB
+      .select("producto_id, nombre_producto, precio_venta, stock")
       .order("nombre_producto", { ascending: true });
 
     if (error) {
-      console.warn("⚠️ No se pudo conectar a la tabla productos de Supabase. Usando datos simulados.");
-      // SI LA TABLA NO EXISTE EN SUPABASE AÚN, DEVOLVEMOS DATOS DE PRUEBA LOCALES:
+      // En este método específico tenías un fallback (datos simulados). 
+      // Igual podemos traducir el error para imprimirlo de forma ultra profesional.
+      const dbError = handleSupabaseError(error);
+      console.warn(`⚠️ [ventaServicio][obtenerProductosParaVenta]: ${dbError.devMessage}. Usando fallback local.`);
+      
       return [
         { producto_id: 1, nombre_producto: "Producto Demo A", precio_venta: 15.50, stock: 100 },
         { producto_id: 2, nombre_producto: "Producto Demo B", precio_venta: 45.00, stock: 50 },
@@ -116,4 +141,4 @@ export const ventaServicio = {
     
     return data || [];
   }
-}
+};

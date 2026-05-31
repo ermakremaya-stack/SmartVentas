@@ -1,4 +1,6 @@
 import { supabase } from "../database/supabaseconfig";
+// Importamos el manejador desde la carpeta centralizada (apuntando al index por defecto)
+import { handleSupabaseError } from "../utils/errors";
 
 /**
  * @typedef {Object} Cliente
@@ -13,16 +15,28 @@ import { supabase } from "../database/supabaseconfig";
  */
 
 export const clienteServicio = {
+  /**
+   * Obtiene todos los clientes registrados ordenados de forma descendente por ID
+   * @returns {Promise<Array<Cliente>>} Lista de clientes
+   */
   async obtenerTodos() {
     const { data, error } = await supabase
       .from("clientes")
       .select("*")
       .order("cliente_id", { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      const dbError = handleSupabaseError(error);
+      console.error(`[clienteServicio][obtenerTodos] ❌:`, dbError.devMessage);
+      throw dbError;
+    }
     return data || [];
   },
 
+  /**
+   * Registra un nuevo cliente en el sistema
+   * @param {Cliente} nuevoCliente - Datos del cliente a crear
+   */
   async crear(nuevoCliente) {
     const { error } = await supabase
       .from("clientes")
@@ -38,9 +52,18 @@ export const clienteServicio = {
         },
       ]);
 
-    if (error) throw error;
+    if (error) {
+      const dbError = handleSupabaseError(error);
+      // Usamos el "Object Literal Shorthand" para empaquetar el input fallido con su etiqueta automática
+      console.error(`[clienteServicio][crear] ❌ Falló el registro:`, dbError.devMessage, { nuevoCliente });
+      throw dbError;
+    }
   },
 
+  /**
+   * Actualiza los datos de un cliente existente por su ID
+   * @param {Cliente} clienteEditar - Datos modificados del cliente incluyendo su ID
+   */
   async actualizar(clienteEditar) {
     const { error } = await supabase
       .from("clientes")
@@ -55,15 +78,28 @@ export const clienteServicio = {
       })
       .eq("cliente_id", clienteEditar.cliente_id);
 
-    if (error) throw error;
+    if (error) {
+      const dbError = handleSupabaseError(error);
+      console.error(`[clienteServicio][actualizar] ❌ Error en ID ${clienteEditar.cliente_id}:`, dbError.devMessage, { clienteEditar });
+      throw dbError;
+    }
   },
 
+  /**
+   * Elimina (o desactiva) un cliente de la base de datos por su identificador único
+   * @param {number} cliente_id - ID del cliente a eliminar
+   */
   async eliminar(cliente_id) {
     const { error } = await supabase
       .from("clientes")
       .delete()
       .eq("cliente_id", cliente_id);
 
-    if (error) throw error;
+    if (error) {
+      const dbError = handleSupabaseError(error);
+      // Guardamos la variable suelta dentro del objeto para que en consola salga "cliente_id: X"
+      console.error(`[clienteServicio][eliminar] ❌ No se pudo borrar:`, dbError.devMessage, { cliente_id });
+      throw dbError;
+    }
   },
 };
