@@ -80,7 +80,7 @@ const Ventas = () => {
     if (venta.detalles_ventas?.length > 0) {
       setDetalles(venta.detalles_ventas.map(d => ({
         producto_id: d.producto_id,
-        nombre_producto: d.productos?.nombre_producto || "Producto",
+        nombre: d.productos?.nombre || "Producto",
         precio: d.precio_unitario,
         cantidad: d.cantidad
       })));
@@ -110,7 +110,7 @@ const Ventas = () => {
       }
       return [...prev, {
         producto_id: producto.producto_id,
-        nombre_producto: producto.nombre_producto,
+        nombre: producto.nombre,
         precio: producto.precio_venta,
         cantidad: cantidad
       }];

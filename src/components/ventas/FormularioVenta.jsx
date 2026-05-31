@@ -200,7 +200,7 @@ const FormularioVenta = ({
                         <Table striped hover size="sm" className="mb-0 align-middle">
                             <thead className="table-dark sticky-top">
                                 <tr>
-                                    <th>Cod</th>
+                                    <th>ID</th>
                                     <th>Descripción del Producto</th>
                                     <th className="text-end" style={{ width: "120px" }}>Precio</th>
                                     <th className="text-center" style={{ width: "130px" }}>Cantidad</th>
@@ -220,7 +220,7 @@ const FormularioVenta = ({
                                     detalles.map((item) => (
                                         <tr key={item.producto_id}>
                                             <td>{item.producto_id}</td>
-                                            <td className="fw-semibold text-dark">{item.nombre_producto}</td>
+                                            <td className="fw-semibold text-dark">{item.nombre}</td>
                                             <td className="text-end">{formatearMoneda(item.precio)}</td>
                                             <td className="text-center">
                                                 <Form.Control
