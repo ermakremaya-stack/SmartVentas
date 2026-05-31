@@ -119,23 +119,27 @@ export const ventaServicio = {
 
   /**
    * TEMPORAL: Obtiene la lista de productos para desbloquear el desarrollo de Ventas
+
+   * Obtiene la lista completa de productos disponibles para la venta.
+   * Cuenta con un mecanismo de respaldo (fallback) que devuelve datos simulados
+   * en caso de que ocurra un error de conexión o de estructura en la base de datos.
+   * @returns {Promise<Array<{producto_id: number, nombre: string, precio_venta: number, stock: number}>>} Lista de productos.
    */
   async obtenerProductosParaVenta() {
     const { data, error } = await supabase
       .from("productos")
-      .select("producto_id, nombre_producto, precio_venta, stock")
-      .order("nombre_producto", { ascending: true });
+      .select("producto_id, nombre, precio_venta, stock")
+      .order("nombre", { ascending: true });
 
     if (error) {
-      // En este método específico tenías un fallback (datos simulados). 
-      // Igual podemos traducir el error para imprimirlo de forma ultra profesional.
       const dbError = handleSupabaseError(error);
       console.warn(`⚠️ [ventaServicio][obtenerProductosParaVenta]: ${dbError.devMessage}. Usando fallback local.`);
       
+      // Datos de prueba locales para no bloquear el desarrollo del flujo de caja
       return [
-        { producto_id: 1, nombre_producto: "Producto Demo A", precio_venta: 15.50, stock: 100 },
-        { producto_id: 2, nombre_producto: "Producto Demo B", precio_venta: 45.00, stock: 50 },
-        { producto_id: 3, nombre_producto: "Producto Demo C", precio_venta: 120.00, stock: 12 }
+        { producto_id: 1, nombre: "Producto Demo A", precio_venta: 15.50, stock: 100 },
+        { producto_id: 2, nombre: "Producto Demo B", precio_venta: 45.00, stock: 50 },
+        { producto_id: 3, nombre: "Producto Demo C", precio_venta: 120.00, stock: 12 }
       ];
     }
     
