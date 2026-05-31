@@ -30,6 +30,11 @@ export const SUPABASE_ERRORS = {
     message: 'No se encontró el registro solicitado.',
     devMessage: 'La consulta esperaba exactamente 1 fila (.single()) pero recibió 0 filas.',
     status: 404
+  },
+  '42703': {
+    message: 'Error interno en la estructura de la consulta.',
+    devMessage: 'Una o más columnas especificadas en el .select() o .order() no existen en la tabla. Revisa si hay errores de dedo (typos).',
+    status: 400
   }
 };
 
