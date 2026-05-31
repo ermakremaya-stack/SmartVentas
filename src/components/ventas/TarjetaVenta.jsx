@@ -6,7 +6,6 @@ import { TarjetaBase } from "@/utils/tarjetas";
 export const TarjetaVenta = ({
     ventas,
     abrirModalEdicion,
-    abrirModalEliminacion,
     generarPDFVenta,
 }) => {
     const { idActivo, alternarActivo, cerrar } = useSeleccionTarjeta();

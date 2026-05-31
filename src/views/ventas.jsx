@@ -189,7 +189,6 @@ const Ventas = () => {
             <TarjetaVenta 
               ventas={ventasPaginadas} 
               abrirModalEdicion={abrirEdicion} 
-              abrirModalEliminacion={() => {}} 
               generarPDFVenta={() => {}} 
             />
           </div>
