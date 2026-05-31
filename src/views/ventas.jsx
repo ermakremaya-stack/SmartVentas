@@ -41,16 +41,20 @@ const Ventas = () => {
     setTotalGeneral(total);
   }, [detalles]);
 
-  // Motor de búsquedas reactivo
+  // Motor de búsquedas reactivo (Sincronizado con las columnas reales de tu servicio)
   useEffect(() => {
     if (!textoBusqueda.trim()) {
       setVentasFiltradas(ventas);
     } else {
       const textoLower = textoBusqueda.toLowerCase();
-      const filtradas = ventas.filter(v =>
-        `${v.clientes?.nombre_cliente || ""} ${v.clientes?.apellido_cliente || ""}`.toLowerCase().includes(textoLower) ||
-        `${v.empleados?.nombre_empleado || ""} ${v.empleados?.apellido_empleado || ""}`.toLowerCase().includes(textoLower)
-      );
+      const filtradas = ventas.filter(v => {
+        // Mapeo adaptado a nombre1 y apellido1 que vienen de tu servicio de Supabase
+        const nombreCliente = `${v.clientes?.nombre1 || ""} ${v.clientes?.apellido1 || ""}`.toLowerCase();
+        // Fallback por si la tabla empleados maneja nombre_empleado o nombre completo
+        const nombreEmpleado = `${v.empleados?.nombre_empleado || ""} ${v.empleados?.apellido_empleado || ""}`.toLowerCase();
+        
+        return nombreCliente.includes(textoLower) || nombreEmpleado.includes(textoLower);
+      });
       setVentasFiltradas(filtradas);
     }
   }, [textoBusqueda, ventas]);
@@ -66,8 +70,10 @@ const Ventas = () => {
     setMostrarFormulario(true);
   };
 
+  // Función de Edición robusta y sincronizada con el servicio unificado
   const abrirEdicion = (venta) => {
     setVentaAEditar(venta);
+    
     const cliente = clientes.find(c => c.cliente_id === venta.cliente_id);
     const empleado = empleados.find(e => e.id_empleado === venta.id_empleado);
 
@@ -75,12 +81,13 @@ const Ventas = () => {
     setEmpleadoSeleccionado(empleado || null);
     setMetodoPago(venta.metodo_pago || "efectivo");
 
-    if (venta.detalles_ventas?.length > 0) {
+    // Verificamos la existencia de la subtabla inyectada por la Opción 1
+    if (venta.detalles_ventas && venta.detalles_ventas.length > 0) {
       setDetalles(venta.detalles_ventas.map(d => ({
         producto_id: d.producto_id,
-        nombre: d.productos?.nombre || "Producto",
-        precio: d.precio_unitario,
-        cantidad: d.cantidad
+        nombre: d.productos?.nombre || "Producto", // Lee correctamente el JOIN de productos
+        precio: Number(d.precio_unitario),
+        cantidad: Number(d.cantidad)
       })));
     } else {
       setDetalles([]);
@@ -96,7 +103,7 @@ const Ventas = () => {
     setVentaAEditar(null);
   };
 
-  // === FUNCIONES DEL CARRITO COMPLETADAS (EVITA EL TRUNCAMIENTO) ===
+  // === FUNCIONES DEL CARRITO COMPLETADAS ===
   const agregarDetalle = (producto, cantidad) => {
     if (!producto || !cantidad) return;
     setDetalles(prev => {
@@ -110,6 +117,7 @@ const Ventas = () => {
         producto_id: producto.producto_id,
         nombre: producto.nombre,
         precio: producto.precio_venta,
+        amount: cantidad, // Alias de soporte si se requiere
         cantidad: cantidad
       }];
     });
@@ -226,5 +234,4 @@ const Ventas = () => {
     </Container>
   );
 };
-
 export default Ventas;

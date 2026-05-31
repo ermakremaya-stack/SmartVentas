@@ -23,8 +23,8 @@ import { handleSupabaseError } from "@/utils/errors";
 
 export const ventaServicio = {
   /**
-   * Obtiene todas las ventas incluyendo las columnas específicas del cliente relacionado
-   * @returns {Promise<Array>} Lista de ventas formateadas
+   * Obtiene todas las ventas incluyendo clientes y sus respectivos detalles de artículos
+   * @returns {Promise<Array>} Lista de ventas formateadas con subtablas
    */
   async obtenerTodas() {
     const { data, error } = await supabase
@@ -40,16 +40,23 @@ export const ventaServicio = {
           nombre1,
           apellido1,
           cedula
+        ),
+        detalles_ventas (
+          id_detalle,
+          producto_id,
+          cantidad,
+          precio_unitario,
+          subtotal,
+          productos (
+            nombre
+          )
         )
       `)
       .order("id_venta", { ascending: false });
   
     if (error) {
-      // 2. Traducimos el error crudo
       const dbError = handleSupabaseError(error);
-      // 3. Imprimimos el mensaje técnico exacto para desarrollo
       console.error(`[ventaServicio][obtenerTodas] ❌:`, dbError.devMessage);
-      // 4. Lanzamos el error robusto
       throw dbError;
     }
     return data || [];
