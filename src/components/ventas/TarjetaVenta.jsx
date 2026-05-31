@@ -80,17 +80,7 @@ export const TarjetaVenta = ({
                                 >
                                     <i className="bi bi-pencil me-1"></i> Editar
                                 </Button>
-                                <Button
-                                    variant="outline-danger"
-                                    size="sm"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        abrirModalEliminacion(venta);
-                                        cerrar();
-                                    }}
-                                >
-                                    <i className="bi bi-trash me-1"></i> Borrar
-                                </Button>
+
                                 <Button
                                     variant="outline-primary"
                                     size="sm"
