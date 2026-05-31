@@ -63,7 +63,6 @@ const TablaVentas = ({
                     <th>Cliente</th>
                     <th>Monto Total</th>
                     <th className="text-center">Estado</th>
-                    <th>Observaciones</th>
                     <th className="text-center">Acciones</th>
                 </tr>
             </thead>
@@ -89,9 +88,6 @@ const TablaVentas = ({
                             </td>
                             <td className="text-center">
                                 {obtenerBadgeEstado(venta.estado)}
-                            </td>
-                            <td className="text-muted small text-truncate" style={{ maxWidth: "200px" }}>
-                                {venta.observaciones || "Sin observaciones"}
                             </td>
                             <td className="text-center text-nowrap">
                                 <Button
