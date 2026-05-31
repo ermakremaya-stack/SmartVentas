@@ -1,7 +1,7 @@
 import React from "react";
 import { Row, Col, Spinner, Button, Badge } from "react-bootstrap";
-import { useSeleccionTarjeta } from "../../components/herramientas/tarjetas/useSeleccionTarjeta";
-import TarjetaBase from "../herramientas/tarjetas/TarjetaBase";
+import { useSeleccionTarjeta } from "@/utils/tarjetas";
+import { TarjetaBase } from "@/utils/tarjetas";
 
 const TarjetaVenta = ({
     ventas,

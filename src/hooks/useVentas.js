@@ -1,7 +1,7 @@
 // src/hooks/useVentas.js
 import { useState, useEffect } from "react";
-import { supabase } from "../../database/supabaseconfig";
-import { ventaServicio } from "../../services/ventaServicio"; // Conectamos tu servicio unificado
+import { supabase } from "../database/supabaseconfig";
+import { ventaServicio } from "@/services"; // Conectamos tu servicio unificado
 
 export const useVentas = () => {
   const [toast, setToast] = useState({ mostrar: false, mensaje: "", tipo: "" });

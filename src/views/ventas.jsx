@@ -1,7 +1,7 @@
 // src/views/Ventas.jsx
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button, Spinner } from "react-bootstrap";
-import { useVentas } from "../components/hooks/useVentas";
+import { useVentas } from "@/hooks";
 
 import NotificacionOperacion from "../components/NotificationOperation";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";

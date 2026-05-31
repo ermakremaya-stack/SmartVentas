@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardBody } from "react-bootstrap";
 
-const TarjetaBase = ({ id, esActivo, alHacerClick, children, acciones, ariaLabel }) => {
+export const TarjetaBase = ({ id, esActivo, alHacerClick, children, acciones, ariaLabel }) => {
   return (
     <Card
       className="mb-3 border-0 rounded-3 shadow-sm w-100"
@@ -29,5 +29,3 @@ const TarjetaBase = ({ id, esActivo, alHacerClick, children, acciones, ariaLabel
     </Card>
   );
 };
-
-export default TarjetaBase;

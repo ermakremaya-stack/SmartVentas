@@ -1,5 +1,5 @@
 import { supabase } from "../database/supabaseconfig";
-import { handleSupabaseError } from "../components/utils/errors";
+import { handleSupabaseError } from "@/utils/errors";
 
 /**
  * @typedef {Object} DetalleVenta

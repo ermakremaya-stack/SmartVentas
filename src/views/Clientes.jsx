@@ -3,7 +3,7 @@ import { Container, Row, Col, Button, Alert } from "react-bootstrap";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-import { useClientes } from "../components/hooks/useClientes";
+import { useClientes } from "@/hooks";
 
 import ModalRegistroCliente from "../components/clientes/ModalRegistroCliente";
 import ModalEdicionCliente from "../components/clientes/ModalEdicionCliente";
