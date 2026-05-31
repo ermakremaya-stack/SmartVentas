@@ -134,7 +134,7 @@ export const TarjetaVenta = ({
                                     <i className="bi bi-hash me-1"></i> Transacción: #{venta.id_venta}
                                 </div>
                                 <div className="small text-secondary text-truncate">
-                                    <i className="bi bi-calendar-event me-1"></i> Fecha: {formatearFecha(venta.fecha)}
+                                    <i className="bi bi-calendar-event me-1"></i> Fecha: {formatearFecha(venta.fecha_venta)}
                                 </div>
                                 {venta.observaciones && (
                                     <div className="small text-muted text-truncate italic">
