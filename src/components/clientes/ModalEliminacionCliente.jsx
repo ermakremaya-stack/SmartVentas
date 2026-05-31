@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Button } from "react-bootstrap";
 
-const ModalEliminacionCliente = ({
+export const ModalEliminacionCliente = ({
   mostrarModalEliminacion,
   setMostrarModalEliminacion,
   eliminarCliente,
@@ -52,5 +52,3 @@ const ModalEliminacionCliente = ({
     </Modal>
   );
 };
-
-export default ModalEliminacionCliente;

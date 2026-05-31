@@ -3,7 +3,7 @@ import { Row, Col, Spinner, Button, Badge } from "react-bootstrap";
 import { useSeleccionTarjeta } from "@/utils/tarjetas";
 import { TarjetaBase } from "@/utils/tarjetas";
 
-const TarjetaVenta = ({
+export const TarjetaVenta = ({
     ventas,
     abrirModalEdicion,
     abrirModalEliminacion,
@@ -150,5 +150,3 @@ const TarjetaVenta = ({
         </div>
     );
 };
-
-export default TarjetaVenta;

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Form, Button, Row, Col, Table, Card } from "react-bootstrap";
 
-const FormularioVenta = ({
+export const FormularioVenta = ({
     mostrar,
     setMostrar,
     clientes,
@@ -269,5 +269,3 @@ const FormularioVenta = ({
         </Modal>
     );
 };
-
-export default FormularioVenta;

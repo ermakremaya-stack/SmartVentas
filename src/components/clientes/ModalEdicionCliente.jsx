@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Form, Button, Row, Col } from "react-bootstrap";
 
-const ModalEdicionCliente = ({
+export const ModalEdicionCliente = ({
   mostrarModalEdicion,
   setMostrarModalEdicion,
   clienteEditar,
@@ -147,5 +147,3 @@ const ModalEdicionCliente = ({
     </Modal>
   );
 };
-
-export default ModalEdicionCliente;

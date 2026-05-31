@@ -1,7 +1,7 @@
 import React from "react";
 import { Table, Button, Badge } from "react-bootstrap";
 
-const TablaClientes = ({
+export const TablaClientes = ({
   clientes,
   abrirModalEdicion,
   abrirModalEliminacion,
@@ -71,5 +71,3 @@ const TablaClientes = ({
     </Table>
   );
 };
-
-export default TablaClientes;

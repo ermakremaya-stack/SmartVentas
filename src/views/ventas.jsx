@@ -6,9 +6,7 @@ import { useVentas } from "@/hooks";
 import NotificacionOperacion from "../components/NotificationOperation";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import Paginacion from "../components/ornedamiento/Paginacion";
-import TablaVentas from "../components/ventas/TablaVentas";
-import TarjetaVenta from "../components/ventas/TarjetaVenta";
-import FormularioVenta from "../components/ventas/FormularioVenta"; // <-- CAMBIO: Único formulario importado
+import { TablaVentas, TarjetaVenta, FormularioVenta } from "@/components/ventas";
 
 const Ventas = () => {
   const {

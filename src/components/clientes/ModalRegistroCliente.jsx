@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Modal, Form, Button, Row, Col } from "react-bootstrap";
 
-const ModalRegistroCliente = ({
+export const ModalRegistroCliente = ({
   mostrarModal,
   setMostrarModal,
   nuevoCliente,
@@ -153,5 +153,3 @@ const ModalRegistroCliente = ({
     </Modal>
   );
 };
-
-export default ModalRegistroCliente;

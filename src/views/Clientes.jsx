@@ -5,12 +5,14 @@ import autoTable from "jspdf-autotable";
 
 import { useClientes } from "@/hooks";
 
-import ModalRegistroCliente from "../components/clientes/ModalRegistroCliente";
-import ModalEdicionCliente from "../components/clientes/ModalEdicionCliente";
-import ModalEliminacionCliente from "../components/clientes/ModalEliminacionCliente";
+import { ModalRegistroCliente, 
+  ModalEdicionCliente, 
+  ModalEliminacionCliente,
+  TablaClientes, 
+  TarjetaCliente 
+} from "@/components/clientes";
+
 import NotificacionOperacion from "../components/NotificationOperation";
-import TablaClientes from "../components/clientes/TablaClientes";
-import TarjetaCliente from "../components/clientes/TarjetaCliente";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
 import Paginacion from "../components/ornedamiento/Paginacion";
 
