@@ -159,7 +159,7 @@ const FormularioVenta = ({
                                             <option value="">-- Seleccione un artículo --</option>
                                             {productos.map((p) => (
                                                 <option key={p.producto_id} value={p.producto_id}>
-                                                    {p.nombre_producto} - {formatearMoneda(p.precio_venta)} (Stock: {p.stock})
+                                                    {p.nombre} - {formatearMoneda(p.precio_venta)} (Stock: {p.stock})
                                                 </option>
                                             ))}
                                         </Form.Select>
