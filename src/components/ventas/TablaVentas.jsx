@@ -77,8 +77,8 @@ const TablaVentas = ({
                         : "Cliente no especificado";
 
                     return (
-                        <tr key={venta.venta_id} className="align-middle">
-                            <td>{venta.venta_id}</td>
+                        <tr key={venta.id_venta} className="align-middle">
+                            <td>{venta.id_venta}</td>
                             <td className="text-nowrap">{formatearFecha(venta.fecha)}</td>
                             <td className="fw-semibold">
                                 {nombreCliente} {c && <small className="text-muted d-block">{c.cedula}</small>}
