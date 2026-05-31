@@ -64,10 +64,10 @@ export const TarjetaVenta = ({
 
                 return (
                     <TarjetaBase
-                        key={venta.venta_id}
-                        esActivo={idActivo === venta.venta_id}
-                        alHacerClick={() => alternarActivo(venta.venta_id)}
-                        ariaLabel={`Venta número ${venta.venta_id} por ${nombreCliente}`}
+                        key={venta.id_venta}
+                        esActivo={idActivo === venta.id_venta}
+                        alHacerClick={() => alternarActivo(venta.id_venta)}
+                        ariaLabel={`Venta número ${venta.id_venta} por ${nombreCliente}`}
                         acciones={
                             <div className="d-flex gap-2">
                                 <Button
@@ -132,7 +132,7 @@ export const TarjetaVenta = ({
 
                                 {/* Subdetalles */}
                                 <div className="small text-muted text-truncate mt-1">
-                                    <i className="bi bi-hash me-1"></i> Transacción: #{venta.venta_id}
+                                    <i className="bi bi-hash me-1"></i> Transacción: #{venta.id_venta}
                                 </div>
                                 <div className="small text-secondary text-truncate">
                                     <i className="bi bi-calendar-event me-1"></i> Fecha: {formatearFecha(venta.fecha)}
