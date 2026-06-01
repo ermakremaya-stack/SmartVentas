@@ -64,19 +64,20 @@ export const FormularioVenta = ({
         if (exito) setMostrar(false);
     };
 
-    // Manejador del botón manual para congelar la factura
+    // Manejador del botón manual para congelar la factura y procesar stock
     const handleCerrarRegistroDefinitivo = async () => {
         if (!ventaAEditar?.id_venta || cerrandoRecord) return;
         
         // Confirmación nativa de seguridad para evitar errores accidentales
         const seguro = window.confirm(
-            `¿Está seguro que desea CERRAR la venta #${ventaAEditar.id_venta}? Una vez cerrada, no podrá volver a modificar sus datos ni sus artículos.`
+            `¿Está seguro que desea CERRAR la venta #${ventaAEditar.id_venta}? Una vez cerrada, se descontará el stock del inventario y no podrá volver a modificar sus datos ni sus artículos.`
         );
         
         if (!seguro) return;
 
         setCerrandoRecord(true);
-        const exito = await cerrarVenta(ventaAEditar.id_venta);
+        // Enviamos el ID y el estado actual de los detalles (carrito) para la RPC
+        const exito = await cerrarVenta(ventaAEditar.id_venta, detalles);
         setCerrandoRecord(false);
 
         if (exito) {
@@ -192,7 +193,7 @@ export const FormularioVenta = ({
                         </Card.Body>
                     </Card>
 
-                    {/* SECCIÓN 2: AGREGAR PRODUCTOS AL DETALLE (Se oculta o bloquea si está cerrada) */}
+                    {/* SECCIÓN 2: AGREGAR PRODUCTOS AL DETALLE */}
                     {!esSoloLectura && (
                         <Card className="mb-3 border-secondary-subtle shadow-sm">
                             <Card.Body>

@@ -54,7 +54,7 @@ export const ventaServicio = {
         )
       `)
       .order("id_venta", { ascending: false });
-  
+
     if (error) {
       const dbError = handleSupabaseError(error);
       console.error(`[ventaServicio][obtenerTodas] ❌:`, dbError.devMessage);
@@ -142,7 +142,7 @@ export const ventaServicio = {
     if (error) {
       const dbError = handleSupabaseError(error);
       console.warn(`⚠️ [ventaServicio][obtenerProductosParaVenta]: ${dbError.devMessage}. Usando fallback local.`);
-      
+
       // Datos de prueba locales para no bloquear el desarrollo del flujo de caja
       return [
         { producto_id: 1, nombre: "Producto Demo A", precio_venta: 15.50, stock: 100 },
@@ -150,7 +150,7 @@ export const ventaServicio = {
         { producto_id: 3, nombre: "Producto Demo C", precio_venta: 120.00, stock: 12 }
       ];
     }
-    
+
     return data || [];
   },
 
@@ -171,5 +171,25 @@ export const ventaServicio = {
       throw dbError;
     }
   },
-  
+  async descontarInventario(detalles) {
+    try {
+      const promesas = detalles.map(d =>
+        supabase.rpc('procesar_descuento_stock', {
+          p_producto_id: d.producto_id,
+          p_cantidad: d.cantidad
+        })
+      );
+
+      const resultados = await Promise.all(promesas);
+
+      // Verificar si alguna petición falló
+      for (const res of resultados) {
+        if (res.error) throw res.error;
+      }
+    } catch (error) {
+      const dbError = handleSupabaseError(error);
+      console.error(`[ventaServicio][descontarInventario] ❌:`, dbError.devMessage);
+      throw dbError;
+    }
+  }
 };

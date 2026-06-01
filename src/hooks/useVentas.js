@@ -7,7 +7,7 @@ export const useVentas = () => {
   const [toast, setToast] = useState({ mostrar: false, mensaje: "", tipo: "" });
   const [ventas, setVentas] = useState([]);
   const [cargando, setCargando] = useState(true);
-  
+
   // Datos auxiliares para poblar los selectores del formulario
   const [clientes, setClientes] = useState([]);
   const [empleados, setEmpleados] = useState([]);
@@ -18,7 +18,7 @@ export const useVentas = () => {
     try {
       const [c, e] = await Promise.all([
         supabase.from("clientes").select("*").order("nombre1", { ascending: true }),
-        supabase.from("empleados").select("*").order("nombre_empleado", { ascending: true }) 
+        supabase.from("empleados").select("*").order("nombre_empleado", { ascending: true })
       ]);
 
       setClientes(c.data || []);
@@ -74,7 +74,7 @@ export const useVentas = () => {
           .from("detalles_ventas")
           .delete()
           .eq("id_venta", ventaAEditar.id_venta);
-          
+
         if (errorBorrado) throw errorBorrado;
 
         // 2. Mapear e insertar el nuevo estado del carrito de compras
@@ -110,7 +110,7 @@ export const useVentas = () => {
         if (errorNuevaVenta) throw errorNuevaVenta;
 
         const detallesInsert = detalles.map(d => ({
-          id_venta: ventaData.id_venta, 
+          id_venta: ventaData.id_venta,
           producto_id: Number(d.producto_id),
           cantidad: Number(d.cantidad),
           precio_unitario: Number(d.precio),
@@ -132,33 +132,49 @@ export const useVentas = () => {
     }
   };
 
-  /**
+/**
    * Método exclusivo para cerrar el registro definitivamente de forma manual
-   * @param {number} id_venta - ID único de la venta que se va a clausurar
+   * @param {number} idVenta - ID único de la venta que se va a clausurar
+   * @param {Array} detalles - Listado de artículos a rebajar del inventario
    * @returns {Promise<boolean>} Estado de éxito de la operación
    */
-  const cerrarVenta = async (id_venta) => {
+  const cerrarVenta = async (idVenta, detalles) => {
     try {
-      setCargando(true);
-      await ventaServicio.cambiarEstado(id_venta, "Cerrada");
+      // Re-verificar stock una última vez antes de congelar y descontar físicamente
+      const productosFresh = await ventaServicio.obtenerProductosParaVenta();
       
-      setToast({ 
-        mostrar: true, 
-        mensaje: `La venta #${id_venta} ha sido finalizada y cerrada con éxito`, 
-        tipo: "exito" 
-      });
+      for (const item of detalles) {
+        const prodBD = productosFresh.find(p => p.producto_id === Number(item.producto_id));
+        if (!prodBD || Number(item.cantidad) > Number(prodBD.stock)) {
+          setToast({ 
+            mostrar: true, 
+            mensaje: `No se puede cerrar la venta. El artículo "${item.nombre}" se quedó sin stock suficiente en bodega.`, 
+            tipo: "error" 
+          });
+          return false;
+        }
+      }
+
+      // 1. Cambiamos el estado en la base de datos
+      await ventaServicio.cambiarEstado(idVenta, "Cerrada");
+
+      // 2. Ejecutamos la llamada RPC de consistencia atómica para cada producto del carrito
+      if (detalles && detalles.length > 0) {
+        await ventaServicio.descontarInventario(detalles);
+      }
+
+      setToast({ mostrar: true, mensaje: "Venta cerrada definitivamente e inventario actualizado", tipo: "exito" });
       
-      await cargarVentas(); // Actualizar la tabla principal automáticamente
+      // Sincronizar grilla e inventarios auxiliares
+      await Promise.all([cargarVentas(), cargarDatosAuxiliares()]);
       return true;
     } catch (err) {
-      console.error("❌ Falló el cierre de la venta en el hook:", err);
-      setToast({ mostrar: true, mensaje: "No se pudo cerrar la venta correctamente", tipo: "error" });
+      console.error("❌ Error al cerrar la factura:", err);
+      setToast({ mostrar: true, mensaje: "Error al consolidar el cierre en el inventario", tipo: "error" });
       return false;
-    } finally {
-      setCargando(false);
     }
   };
-
+  
   useEffect(() => {
     cargarVentas();
     cargarDatosAuxiliares();
