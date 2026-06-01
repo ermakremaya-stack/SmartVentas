@@ -49,6 +49,12 @@ export const useVentas = () => {
   // Guardar o Actualizar Venta (Lógica transaccional unificada)
   const procesarGuardarVenta = async (ventaAEditar, datosVenta, detalles) => {
     try {
+      // Bloqueo de seguridad: Si intentan editar una venta que ya está Cerrada en base de datos
+      if (ventaAEditar?.estado === "Cerrada") {
+        setToast({ mostrar: true, mensaje: "No se puede modificar una venta Cerrada", tipo: "error" });
+        return false;
+      }
+
       if (ventaAEditar) {
         // === MODO: ACTUALIZAR VENTA EXISTENTE ===
         const { error: errorVenta } = await supabase
@@ -95,7 +101,8 @@ export const useVentas = () => {
             id_empleado: Number(datosVenta.id_empleado),
             fecha_venta: nicaNow(),
             metodo_pago: datosVenta.metodo_pago,
-            total: Number(datosVenta.total)
+            total: Number(datosVenta.total),
+            estado: "Abierta" // Forzamos explícitamente el inicio del flujo en "Abierta"
           }])
           .select()
           .single();
@@ -125,6 +132,33 @@ export const useVentas = () => {
     }
   };
 
+  /**
+   * Método exclusivo para cerrar el registro definitivamente de forma manual
+   * @param {number} id_venta - ID único de la venta que se va a clausurar
+   * @returns {Promise<boolean>} Estado de éxito de la operación
+   */
+  const cerrarVenta = async (id_venta) => {
+    try {
+      setCargando(true);
+      await ventaServicio.cambiarEstado(id_venta, "Cerrada");
+      
+      setToast({ 
+        mostrar: true, 
+        mensaje: `La venta #${id_venta} ha sido finalizada y cerrada con éxito`, 
+        tipo: "exito" 
+      });
+      
+      await cargarVentas(); // Actualizar la tabla principal automáticamente
+      return true;
+    } catch (err) {
+      console.error("❌ Falló el cierre de la venta en el hook:", err);
+      setToast({ mostrar: true, mensaje: "No se pudo cerrar la venta correctamente", tipo: "error" });
+      return false;
+    } finally {
+      setCargando(false);
+    }
+  };
+
   useEffect(() => {
     cargarVentas();
     cargarDatosAuxiliares();
@@ -138,6 +172,7 @@ export const useVentas = () => {
     productos,
     toast,
     setToast,
-    procesarGuardarVenta
+    procesarGuardarVenta,
+    cerrarVenta // <-- Exportamos el nuevo método para que la interfaz lo pueda consumir
   };
 };

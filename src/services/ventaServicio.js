@@ -36,6 +36,7 @@ export const ventaServicio = {
         fecha_venta,
         metodo_pago,
         total,
+        estado,
         clientes (
           nombre1,
           apellido1,
@@ -151,5 +152,24 @@ export const ventaServicio = {
     }
     
     return data || [];
-  }
+  },
+
+  /**
+   * Actualiza EXCLUSIVAMENTE el estado del flujo de una venta (Abierta / Cerrada)
+   * @param {number} id_venta - Identificador único de la venta
+   * @param {'Abierta'|'Cerrada'} nuevoEstado - El estado al que se desea cambiar
+   */
+  async cambiarEstado(id_venta, nuevoEstado) {
+    const { error } = await supabase
+      .from("ventas")
+      .update({ estado: nuevoEstado })
+      .eq("id_venta", id_venta);
+
+    if (error) {
+      const dbError = handleSupabaseError(error);
+      console.error(`[ventaServicio][cambiarEstado] ❌ No se pudo cambiar el estado a ${nuevoEstado} en la venta ID ${id_venta}:`, dbError.devMessage);
+      throw dbError;
+    }
+  },
+  
 };

@@ -4,35 +4,9 @@ import { Table, Button, Badge } from "react-bootstrap";
 export const TablaVentas = ({
     ventas,
     abrirModalEdicion,
-    abrirModalEliminacion,
     generarPDFVenta,
 }) => {
-    // Función auxiliar para renderizar el Badge según el estado de la venta
-    const obtenerBadgeEstado = (estado) => {
-        switch (estado) {
-            case "Completada":
-                return (
-                    <Badge bg="success">
-                        <i className="bi bi-check-circle me-1"></i> Completada
-                    </Badge>
-                );
-            case "Pendiente":
-                return (
-                    <Badge bg="warning" text="dark">
-                        <i className="bi bi-clock me-1"></i> Pendiente
-                    </Badge>
-                );
-            case "Anulada":
-                return (
-                    <Badge bg="danger">
-                        <i className="bi bi-x-circle me-1"></i> Anulada
-                    </Badge>
-                );
-            default:
-                return <Badge bg="secondary">{estado}</Badge>;
-        }
-    };
-
+    
     // Función auxiliar para formatear la fecha de Supabase (ISO string)
     const formatearFecha = (fechaString) => {
         if (!fechaString) return "---";
@@ -87,7 +61,7 @@ export const TablaVentas = ({
                                 {formatearMoneda(venta.total)}
                             </td>
                             <td className="text-center">
-                                {obtenerBadgeEstado(venta.estado)}
+                                {venta.estado}
                             </td>
                             <td className="text-center text-nowrap">
                                 <Button

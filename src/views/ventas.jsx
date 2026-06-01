@@ -17,7 +17,8 @@ const Ventas = () => {
     productos,
     toast,
     setToast,
-    procesarGuardarVenta
+    procesarGuardarVenta,
+    cerrarVenta
   } = useVentas();
 
   // Estados locales de control de la UI
@@ -230,6 +231,7 @@ const Ventas = () => {
         actualizarCantidad={actualizarCantidad}
         guardarVenta={handleGuardarVenta}
         ventaAEditar={ventaAEditar}
+        cerrarVenta={cerrarVenta}      
       />
     </Container>
   );
