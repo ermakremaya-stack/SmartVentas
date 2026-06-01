@@ -50,6 +50,9 @@ export const TablaVentas = ({
                             : `${c.nombre1 || ""} ${c.apellido1 || ""}`.trim()
                         : "Cliente no especificado";
 
+                    // Determinar si la venta está cerrada
+                    const esCerrada = venta.estado === "Cerrada";
+
                     return (
                         <tr key={venta.id_venta} className="align-middle">
                             <td>{venta.id_venta}</td>
@@ -61,18 +64,40 @@ export const TablaVentas = ({
                                 {formatearMoneda(venta.total)}
                             </td>
                             <td className="text-center">
-                                {venta.estado}
+                                {/* Detalle 1: Badge condicional verde (success) para Abierta y rojo (danger) para Cerrada */}
+                                <Badge 
+                                    bg={esCerrada ? "danger" : "success"} 
+                                    className="px-2.5 py-1.5 fs-7 fw-bold shadow-sm"
+                                >
+                                    <i className={`bi ${esCerrada ? "bi-lock-fill" : "bi-unlock-fill"} me-1`}></i>
+                                    {venta.estado || "Abierta"}
+                                </Badge>
                             </td>
                             <td className="text-center text-nowrap">
-                                <Button
-                                    variant="outline-warning"
-                                    size="sm"
-                                    className="me-2"
-                                    onClick={() => abrirModalEdicion(venta)}
-                                    title="Editar Venta / Cambiar Estado"
-                                >
-                                    <i className="bi bi-pencil"></i>
-                                </Button>
+                                {/* Detalle 2: Intercambio dinámico del botón según el estado */}
+                                {esCerrada ? (
+                                    // Botón verde con ojo para registros Cerrados (Solo lectura)
+                                    <Button
+                                        variant="outline-success"
+                                        size="sm"
+                                        className="me-2"
+                                        onClick={() => abrirModalEdicion(venta)}
+                                        title="Ver detalles de la venta (Solo Lectura)"
+                                    >
+                                        <i className="bi bi-eye-fill"></i>
+                                    </Button>
+                                ) : (
+                                    // Botón clásico amarillo para registros Abiertos
+                                    <Button
+                                        variant="outline-warning"
+                                        size="sm"
+                                        className="me-2"
+                                        onClick={() => abrirModalEdicion(venta)}
+                                        title="Editar Venta / Cerrar Registro"
+                                    >
+                                        <i className="bi bi-pencil"></i>
+                                    </Button>
+                                )}
 
                                 <Button
                                     variant="outline-primary"
