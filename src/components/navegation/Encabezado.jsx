@@ -128,6 +128,14 @@ const Encabezado = () => {
               <strong>Ventas</strong>
             </Nav.Link>
 
+            <Nav.Link
+              onClick={() => manejarNavegacion("/dashboard")}
+              className={mostrarMenu ? "color-texto-marca" : "text-white"}
+            >
+              {mostrarMenu ? <i className="bi-cash-coin me-2"></i> : null}
+              <strong>Dashboard</strong>
+            </Nav.Link>
+
             {/* Ícono cerrar sesión en barra superior */}
             {mostrarMenu ? null : (
               <Nav.Link
