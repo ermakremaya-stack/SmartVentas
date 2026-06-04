@@ -55,7 +55,6 @@ const Productos = () => {
         (producto) =>
           producto.nombre.toLowerCase().includes(textoLower) ||
           String(producto.categoria_id).includes(textoLower) ||
-          String(producto.existencias).includes(textoLower) ||
           String(producto.precio_compra).includes(textoLower) ||
           String(producto.precio_venta).includes(textoLower)
       );
@@ -68,7 +67,6 @@ const Productos = () => {
     producto_id: "",
     nombre: "",
     categoria_id: "",
-    existencias: "",
     precio_compra: "",
     precio_venta: "",
     activo: true,
@@ -77,7 +75,6 @@ const Productos = () => {
   const [nuevoProducto, setNuevoProducto] = useState({
     nombre: "",
     categoria_id: "",
-    existencias: "",
     precio_compra: "",
     precio_venta: "",
     activo: true,
@@ -88,7 +85,6 @@ const Productos = () => {
       producto_id: producto.producto_id,
       nombre: producto.nombre,
       categoria_id: producto.categoria_id,
-      existencias: producto.existencias,
       precio_compra: producto.precio_compra,
       precio_venta: producto.precio_venta,
       activo: producto.activo,
@@ -152,7 +148,6 @@ const Productos = () => {
       if (
         !nuevoProducto.nombre.trim() ||
         nuevoProducto.categoria_id === "" ||
-        nuevoProducto.existencias === "" ||
         nuevoProducto.precio_compra === "" ||
         nuevoProducto.precio_venta === ""
       ) {
@@ -168,7 +163,6 @@ const Productos = () => {
         {
           nombre: nuevoProducto.nombre,
           categoria_id: nuevoProducto.categoria_id,
-          existencias: nuevoProducto.existencias,
           precio_compra: nuevoProducto.precio_compra,
           precio_venta: nuevoProducto.precio_venta,
           activo: nuevoProducto.activo,
@@ -194,7 +188,6 @@ const Productos = () => {
       setNuevoProducto({
         nombre: "",
         categoria_id: "",
-        existencias: "",
         precio_compra: "",
         precio_venta: "",
         activo: true,
@@ -218,7 +211,6 @@ const Productos = () => {
       if (
         !productoEditar.nombre.trim() ||
         productoEditar.categoria_id === "" ||
-        productoEditar.existencias === "" ||
         productoEditar.precio_compra === "" ||
         productoEditar.precio_venta === ""
       ) {
@@ -237,7 +229,6 @@ const Productos = () => {
         .update({
           nombre: productoEditar.nombre,
           categoria_id: productoEditar.categoria_id,
-          existencias: productoEditar.existencias,
           precio_compra: productoEditar.precio_compra,
           precio_venta: productoEditar.precio_venta,
           activo: productoEditar.activo,

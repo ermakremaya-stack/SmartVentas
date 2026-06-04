@@ -54,17 +54,6 @@ const ModalEdicionProducto = ({
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Existencias</Form.Label>
-            <Form.Control
-              type="number"
-              name="existencias"
-              value={productoEditar.existencias}
-              onChange={manejoCambioInputEdicion}
-              placeholder="Ingresa las existencias"
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
             <Form.Label>Precio Compra</Form.Label>
             <Form.Control
               type="number"
@@ -99,7 +88,10 @@ const ModalEdicionProducto = ({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => setMostrarModalEdicion(false)}>
+        <Button
+          variant="secondary"
+          onClick={() => setMostrarModalEdicion(false)}
+        >
           Cancelar
         </Button>
 
@@ -109,7 +101,6 @@ const ModalEdicionProducto = ({
           disabled={
             productoEditar.nombre.trim() === "" ||
             productoEditar.categoria_id === "" ||
-            productoEditar.existencias === "" ||
             productoEditar.precio_compra === "" ||
             productoEditar.precio_venta === "" ||
             deshabilitado

@@ -27,7 +27,6 @@ const TablaProductos = ({
               <th>ID</th>
               <th>Nombre</th>
               <th>Categoría ID</th>
-              <th className="d-none d-md-table-cell">Existencias</th>
               <th className="d-none d-md-table-cell">Precio Compra</th>
               <th className="d-none d-md-table-cell">Precio Venta</th>
               <th className="d-none d-md-table-cell">Activo</th>
@@ -41,9 +40,6 @@ const TablaProductos = ({
                 <td>{producto.producto_id}</td>
                 <td>{producto.nombre}</td>
                 <td>{producto.categoria_id}</td>
-                <td className="d-none d-md-table-cell">
-                  {producto.existencias}
-                </td>
                 <td className="d-none d-md-table-cell">
                   {producto.precio_compra}
                 </td>

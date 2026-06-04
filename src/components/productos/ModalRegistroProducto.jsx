@@ -54,17 +54,6 @@ const ModalRegistroProducto = ({
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Existencias</Form.Label>
-            <Form.Control
-              type="number"
-              name="existencias"
-              value={nuevoProducto?.existencias || ""}
-              onChange={manejoCambioInput}
-              placeholder="Ingresa las existencias"
-            />
-          </Form.Group>
-
-          <Form.Group className="mb-3">
             <Form.Label>Precio Compra</Form.Label>
             <Form.Control
               type="number"
@@ -109,7 +98,6 @@ const ModalRegistroProducto = ({
           disabled={
             !nuevoProducto?.nombre?.trim() ||
             !nuevoProducto?.categoria_id ||
-            !nuevoProducto?.existencias ||
             !nuevoProducto?.precio_compra ||
             !nuevoProducto?.precio_venta ||
             deshabilitado

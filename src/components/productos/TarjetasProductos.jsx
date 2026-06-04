@@ -75,10 +75,6 @@ const TarjetasProductos = ({
                       <div className="small text-muted text-truncate">
                         Categoría ID: {producto.categoria_id}
                       </div>
-
-                      <div className="small text-muted text-truncate">
-                        Existencias: {producto.existencias}
-                      </div>
                     </Col>
 
                     <Col
