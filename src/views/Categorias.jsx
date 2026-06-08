@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Button, Spinner } from "react-bootstrap";
+// Se añade 'Alert' en las importaciones de react-bootstrap para solucionar el pantallazo blanco
+import { Container, Row, Col, Button, Spinner, Alert } from "react-bootstrap";
 import { supabase } from "../database/supabaseconfig";
 
 import ModalRegistroCategoria from "../components/categorias/ModalRegistroCategoria";
 import NotificacionOperacion from "../components/NotificationOperation";
-import TablaCategorias from "../components/categorias/TablaCategorias"
+import TablaCategorias from "../components/categorias/TablaCategorias";
 import ModalEdicionCategoria from "../components/categorias/ModalEdicionCategoria";
 import ModalEliminacionCategoria from "../components/categorias/ModalEliminacionCategoria";
 import TarjetaCategoria from "../components/categorias/TarjetaCategoria";
@@ -23,11 +24,12 @@ const Categorias = () => {
     const [mostrarModal, setMostrarModal] = useState(false);
 
     const [categorias, setCategorias] = useState([]);
-    const [cargando, setCargando] = useState(true); // Estado de carga inicial
+    const [cargando, setCargando] = useState(true); 
     const [mostrarModalEliminacion, setMostrarModalEliminacion] = useState(false);
     const [categoriaAEliminar, setCategoriaAEliminar] = useState(null);
     const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
 
+    // Las categorías que se muestran por página se calculan sobre las filtradas
     const categoriasPaginadas = categoriasFiltradas.slice(
         (paginaActual - 1) * registrosPorPagina,
         paginaActual * registrosPorPagina
@@ -35,6 +37,7 @@ const Categorias = () => {
 
     const manejarBusqueda = (e) => {
         setTextoBusqueda(e.target.value);
+        establecerPaginaActual(1); // Reinicia a la página 1 al buscar
     };
 
     useEffect(() => {
@@ -42,14 +45,19 @@ const Categorias = () => {
             setCategoriasFiltradas(categorias);
         } else {
             const textoLower = textoBusqueda.toLowerCase().trim();
-            const filtradas = categorias.filter(
-                (cat) =>
-                    cat.nombre_categoria.toLowerCase().includes(textoLower) ||
-                    (cat.descripcion_categoria && cat.descripcion_categoria.toLowerCase().includes(textoLower))
-            );
+            const filtradas = PatternFiltrar(textoLower);
             setCategoriasFiltradas(filtradas);
         }
     }, [textoBusqueda, categorias]);
+
+    // Función auxiliar de filtrado limpio
+    const PatternFiltrar = (texto) => {
+        return categorias.filter(
+            (cat) =>
+                (cat.nombre_categoria && cat.nombre_categoria.toLowerCase().includes(texto)) ||
+                (cat.descripcion_categoria && cat.descripcion_categoria.toLowerCase().includes(texto))
+        );
+    };
 
     const [categoriaEditar, setCategoriaEditar] = useState({
         id_categoria: "",
@@ -92,8 +100,6 @@ const Categorias = () => {
                 });
                 return;
             }
-            console.log("cargandoCategorias");
-            console.log(data);
             setCategorias(data || []);
         } catch (err) {
             console.error("Excepcion al cargar categorias:", err.message);
@@ -111,7 +117,6 @@ const Categorias = () => {
         cargarCategorias();
     }, []);
 
-
     const manejoCambioInput = (e) => {
         const { name, value } = e.target;
         setNuevaCategoria((prev) => ({
@@ -122,10 +127,7 @@ const Categorias = () => {
 
     const agregarCategoria = async () => {
         try {
-            if (
-                !nuevaCategoria.nombre_categoria.trim() ||
-                !nuevaCategoria.descripcion_categoria.trim()
-            ) {
+            if (!nuevaCategoria.nombre_categoria.trim() || !nuevaCategoria.descripcion_categoria.trim()) {
                 setToast({
                     mostrar: true,
                     mensaje: "Debe llenar todos los campos.",
@@ -151,17 +153,14 @@ const Categorias = () => {
                 return;
             }
 
-            //Exito
             setToast({
                 mostrar: true,
                 mensaje: `Categoria "${nuevaCategoria.nombre_categoria}" registrada exitosamente.`,
                 tipo: "exito",
             });
 
-            // limpiar formulario y cerrar modal
             setNuevaCategoria({ nombre_categoria: "", descripcion_categoria: "" });
             setMostrarModal(false);
-
             await cargarCategorias();
 
         } catch (err) {
@@ -176,10 +175,7 @@ const Categorias = () => {
 
     const actualizarCategoria = async () => {
         try {
-            if (
-                !categoriaEditar.nombre_categoria.trim() ||
-                !categoriaEditar.descripcion_categoria.trim()
-            ) {
+            if (!categoriaEditar.nombre_categoria.trim() || !categoriaEditar.descripcion_categoria.trim()) {
                 setToast({
                     mostrar: true,
                     mensaje: "Debe llenar todos los campos.",
@@ -277,10 +273,7 @@ const Categorias = () => {
                     </h3>
                 </Col>
                 <Col xs={3} sm={5} md={5} lg={5} className="text-end">
-                    <Button
-                        onClick={() => setMostrarModal(true)}
-                        size="md"
-                    >
+                    <Button onClick={() => setMostrarModal(true)} size="md">
                         <i className="bi-plus-lg"></i>
                         <span className="d-none d-sm-inline ms-2">Nueva Categoria</span>
                     </Button>
@@ -289,7 +282,6 @@ const Categorias = () => {
 
             <hr />
 
-            {/* Spinner mientras se cargan las categorias */}
             {cargando && (
                 <Row className="text-center my-5">
                     <Col>
@@ -299,7 +291,6 @@ const Categorias = () => {
                 </Row>
             )}
 
-            {/* Cuadro de busqueda debajo de la linea divisora */}
             <Row className="mb-4">
                 <Col md={6} lg={5}>
                     <CuadroBusquedas
@@ -310,7 +301,6 @@ const Categorias = () => {
                 </Col>
             </Row>
 
-            {/* Mensaje de no coincidencias solo cuando hay busqueda y no hay resultados */}
             {!cargando && textoBusqueda.trim() && categoriasFiltradas.length === 0 && (
                 <Row className="mb-4">
                     <Col>
@@ -322,12 +312,12 @@ const Categorias = () => {
                 </Row>
             )}
 
-            {/* Lista de categorias filtradas */}
+            {/* Vista Móvil: Muestra las categorías filtradas y paginadas */}
             {!cargando && categoriasFiltradas.length > 0 && (
                 <Row>
                     <Col xs={12} sm={12} md={12} className="d-lg-none">
                         <TarjetaCategoria
-                            categorias={categoriasFiltradas}
+                            categorias={categoriasPaginadas}
                             abrirModalEdicion={abrirModalEdicion}
                             abrirModalEliminacion={abrirModalEliminacion}
                         />
@@ -335,28 +325,18 @@ const Categorias = () => {
                 </Row>
             )}
 
-
-            {/* Lista de categorias cargadas */}
-            {!cargando && categorias.length > 0 && (
+            {/* Vista Escritorio: Se cambió 'categorias' por 'categoriasPaginadas' para que filtre correctamente */}
+            {!cargando && categoriasFiltradas.length > 0 && (
                 <Row>
                     <Col lg={12} className="d-none d-lg-block">
                         <TablaCategorias
-                            categorias={categorias}
+                            categorias={categoriasPaginadas}
                             abrirModalEdicion={abrirModalEdicion}
                             abrirModalEliminacion={abrirModalEliminacion}
                         />
                     </Col>
                 </Row>
             )}
-
-            <Col xs={12} sm={12} md={12} className="d-lg-none">
-                <TarjetaCategoria
-                    categorias={categorias}
-                    abrirModalEdicion={abrirModalEdicion}
-                    abrirModalEliminacion={abrirModalEliminacion}
-                />
-            </Col>
-
 
             {/* Paginacion */}
             {categoriasFiltradas.length > 0 && (
@@ -369,7 +349,6 @@ const Categorias = () => {
                 />
             )}
 
-            {/* Modal de Registro */}
             <ModalRegistroCategoria
                 mostrarModal={mostrarModal}
                 setMostrarModal={setMostrarModal}
@@ -393,14 +372,12 @@ const Categorias = () => {
                 categoria={categoriaAEliminar}
             />
 
-            {/* Notificacion */}
             <NotificacionOperacion
                 mostrar={toast.mostrar}
                 mensaje={toast.mensaje}
                 tipo={toast.tipo}
                 onCerrar={() => setToast({ ...toast, mostrar: false })}
             />
-
         </Container>
     );
 };
