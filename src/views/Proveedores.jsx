@@ -5,7 +5,6 @@ const Proveedores = () => {
   const [proveedores, setProveedores] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [editandoId, setEditandoId] = useState(null);
-
   const [formData, setFormData] = useState({
     nombre_empresa: '', telefono: '', email: '', direccion: ''
   });
@@ -61,7 +60,6 @@ const Proveedores = () => {
     if (error) alert(error.message); else cargarProveedores();
   };
 
-  // NUEVA FUNCIÓN: Activar
   const handleActivar = async (id) => {
     const { error } = await supabase.from('proveedores').update({ activo: true }).eq('proveedor_id', id);
     if (error) alert(error.message); else cargarProveedores();
@@ -70,7 +68,21 @@ const Proveedores = () => {
   return (
     <div className="container mt-4 text-start">
       <h2 className="mb-4">Módulo de Proveedores</h2>
-      {/* ... [Formulario sigue igual] ... */}
+
+      {/* AQUÍ ESTÁ EL FORMULARIO QUE HACÍA FALTA */}
+      <div className="card p-4 shadow-sm mb-5">
+        <h4 className="card-title">{editandoId ? 'Editar Proveedor' : 'Registrar un nuevo proveedor'}</h4>
+        <form onSubmit={handleSubmit} className="row g-3 mt-2">
+          <div className="col-md-6"><label className="form-label">Nombre</label><input type="text" className="form-control" name="nombre_empresa" value={formData.nombre_empresa} onChange={handleChange} required /></div>
+          <div className="col-md-6"><label className="form-label">Teléfono</label><input type="text" className="form-control" name="telefono" value={formData.telefono} onChange={handleChange} required /></div>
+          <div className="col-md-6"><label className="form-label">Email</label><input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} /></div>
+          <div className="col-md-6"><label className="form-label">Dirección</label><input type="text" className="form-control" name="direccion" value={formData.direccion} onChange={handleChange} /></div>
+          <div className="col-12 mt-4">
+            <button type="submit" className="btn btn-primary">{editandoId ? 'Actualizar' : 'Guardar'}</button>
+          </div>
+        </form>
+      </div>
+
       <div className="card p-4 shadow-sm">
         <h4>Lista de Proveedores</h4>
         <table className="table">
