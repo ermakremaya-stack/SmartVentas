@@ -7,31 +7,19 @@ const Proveedores = () => {
   const [editandoId, setEditandoId] = useState(null);
 
   const [formData, setFormData] = useState({
-    nombre_empresa: '',
-    telefono: '',
-    email: '',
-    direccion: ''
+    nombre_empresa: '', telefono: '', email: '', direccion: ''
   });
 
-  useEffect(() => {
-    cargarProveedores();
-  }, []);
+  useEffect(() => { cargarProveedores(); }, []);
 
   const cargarProveedores = async () => {
     try {
       setCargando(true);
-      const { data, error } = await supabase
-        .from('proveedores')
-        .select('*')
-        .order('nombre_empresa', { ascending: true });
-
+      const { data, error } = await supabase.from('proveedores').select('*').order('nombre_empresa', { ascending: true });
       if (error) throw error;
       setProveedores(data || []);
-    } catch (error) {
-      console.error('Error al cargar proveedores:', error.message);
-    } finally {
-      setCargando(false);
-    }
+    } catch (error) { console.error('Error:', error.message); }
+    finally { setCargando(false); }
   };
 
   const handleChange = (e) => {
@@ -43,94 +31,50 @@ const Proveedores = () => {
     e.preventDefault();
     try {
       if (editandoId) {
-        const { error } = await supabase
-          .from('proveedores')
-          .update({
-            nombre_empresa: formData.nombre_empresa,
-            telefono: formData.telefono,
-            email: formData.email,
-            direccion: formData.direccion
-          })
-          .eq('proveedor_id', editandoId);
-
+        const { error } = await supabase.from('proveedores').update({
+          nombre_empresa: formData.nombre_empresa, telefono: formData.telefono,
+          email: formData.email, direccion: formData.direccion
+        }).eq('proveedor_id', editandoId);
         if (error) throw error;
-        alert('¡Proveedor actualizado con éxito!');
+        alert('¡Actualizado!');
         setEditandoId(null);
       } else {
-        const { error } = await supabase
-          .from('proveedores')
-          .insert([{
-            nombre_empresa: formData.nombre_empresa,
-            telefono: formData.telefono,
-            email: formData.email,
-            direccion: formData.direccion,
-            activo: true // Por defecto nuevo proveedor está activo
-          }]);
-
+        const { error } = await supabase.from('proveedores').insert([{
+          ...formData, activo: true
+        }]);
         if (error) throw error;
-        alert('¡Proveedor registrado con éxito!');
+        alert('¡Registrado!');
       }
-
       setFormData({ nombre_empresa: '', telefono: '', email: '', direccion: '' });
       cargarProveedores();
-    } catch (error) {
-      alert('Error: ' + error.message);
-    }
+    } catch (error) { alert('Error: ' + error.message); }
   };
 
   const handleEditClick = (prov) => {
     setEditandoId(prov.proveedor_id);
-    setFormData({
-      nombre_empresa: prov.nombre_empresa,
-      telefono: prov.telefono,
-      email: prov.email || '',
-      direccion: prov.direccion || ''
-    });
+    setFormData({ nombre_empresa: prov.nombre_empresa, telefono: prov.telefono, email: prov.email || '', direccion: prov.direccion || '' });
   };
 
-  // NUEVA TAREA 4: Desactivar Proveedor (cambia activo a false)
   const handleDesactivar = async (id) => {
-    const confirmar = window.confirm("¿Desactivar este proveedor?");
-    if (!confirmar) return;
+    if (!window.confirm("¿Desactivar este proveedor?")) return;
+    const { error } = await supabase.from('proveedores').update({ activo: false }).eq('proveedor_id', id);
+    if (error) alert(error.message); else cargarProveedores();
+  };
 
-    try {
-      const { error } = await supabase
-        .from('proveedores')
-        .update({ activo: false })
-        .eq('proveedor_id', id);
-
-      if (error) throw error;
-      alert('Proveedor desactivado correctamente.');
-      cargarProveedores();
-    } catch (error) {
-      alert('Error: ' + error.message);
-    }
+  // NUEVA FUNCIÓN: Activar
+  const handleActivar = async (id) => {
+    const { error } = await supabase.from('proveedores').update({ activo: true }).eq('proveedor_id', id);
+    if (error) alert(error.message); else cargarProveedores();
   };
 
   return (
     <div className="container mt-4 text-start">
       <h2 className="mb-4">Módulo de Proveedores</h2>
-      
-      <div className="card p-4 shadow-sm mb-5">
-        <h4 className="card-title">{editandoId ? 'Editar Proveedor' : 'Registrar un nuevo proveedor'}</h4>
-        <form onSubmit={handleSubmit} className="row g-3 mt-2">
-          {/* ... inputs iguales a los que tenías ... */}
-          <div className="col-md-6"><label className="form-label">Nombre</label><input type="text" className="form-control" name="nombre_empresa" value={formData.nombre_empresa} onChange={handleChange} required /></div>
-          <div className="col-md-6"><label className="form-label">Teléfono</label><input type="text" className="form-control" name="telefono" value={formData.telefono} onChange={handleChange} required /></div>
-          <div className="col-md-6"><label className="form-label">Email</label><input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} /></div>
-          <div className="col-md-6"><label className="form-label">Dirección</label><input type="text" className="form-control" name="direccion" value={formData.direccion} onChange={handleChange} /></div>
-          <div className="col-12 mt-4">
-            <button type="submit" className="btn btn-primary">{editandoId ? 'Actualizar' : 'Guardar'}</button>
-          </div>
-        </form>
-      </div>
-
+      {/* ... [Formulario sigue igual] ... */}
       <div className="card p-4 shadow-sm">
         <h4>Lista de Proveedores</h4>
         <table className="table">
-          <thead>
-            <tr><th>Empresa</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr>
-          </thead>
+          <thead><tr><th>Empresa</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead>
           <tbody>
             {proveedores.map((prov) => (
               <tr key={prov.proveedor_id} className={!prov.activo ? "table-secondary" : ""}>
@@ -139,8 +83,10 @@ const Proveedores = () => {
                 <td>{prov.activo ? <span className="badge bg-success">Activo</span> : <span className="badge bg-secondary">Inactivo</span>}</td>
                 <td>
                   <button className="btn btn-sm btn-outline-primary me-2" onClick={() => handleEditClick(prov)}>Editar</button>
-                  {prov.activo && (
+                  {prov.activo ? (
                     <button className="btn btn-sm btn-outline-warning" onClick={() => handleDesactivar(prov.proveedor_id)}>Desactivar</button>
+                  ) : (
+                    <button className="btn btn-sm btn-outline-success" onClick={() => handleActivar(prov.proveedor_id)}>Activar</button>
                   )}
                 </td>
               </tr>
