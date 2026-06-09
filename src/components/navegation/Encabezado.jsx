@@ -132,15 +132,10 @@ const Encabezado = () => {
               <strong>Ventas</strong>
             </Nav.Link>
 
+            {/* ✅ SOLO AQUÍ SE QUITÓ EL DORADO */}
             <Nav.Link
               onClick={() => manejarNavegacion("/compras")}
-              className={
-                location.pathname === "/compras"
-                  ? "text-warning fw-bold"
-                  : mostrarMenu
-                  ? "color-texto-marca"
-                  : "text-white"
-              }
+              className={mostrarMenu ? "color-texto-marca" : "text-white"}
             >
               {mostrarMenu && <i className="bi-bag-check-fill me-2"></i>}
               <strong>Compras</strong>
@@ -196,7 +191,6 @@ const Encabezado = () => {
           className="text-white fw-bold d-flex align-items-center"
           style={{ cursor: "pointer" }}
         >
-          {/* ✅ ÚNICO CAMBIO AQUÍ */}
           <img
             src={logo}
             alt="Logo"
@@ -204,7 +198,6 @@ const Encabezado = () => {
             height="45"
             className="me-2"
           />
-
           <h4 className="mb-0">SmartVentas</h4>
         </Navbar.Brand>
 
