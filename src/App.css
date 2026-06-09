@@ -26,3 +26,47 @@
   color: #1e3d87 !important;
   font-size: 18px;
 }
+
+/* ==================== TARJETAS COMPRAS ==================== */
+.tarjeta-compra-contenedor {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.tarjeta-compra-cuerpo {
+  transition: opacity 150ms ease;
+}
+
+.tarjeta-compra-cuerpo-activo {
+  opacity: 0.4;
+}
+
+.tarjeta-compra-cuerpo-inactivo {
+  opacity: 1;
+}
+
+.tarjeta-compra-placeholder-imagen {
+  height: 55px;
+  width: 55px;
+  line-height: 55px;
+  text-align: center;
+}
+
+.tarjeta-compra-capa {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 8px;
+}
+
+.tarjeta-compra-botones-capa {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 8px;
+  padding: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}

@@ -14,10 +14,12 @@ import Empleados from "./views/Empleados.jsx";
 import Cliente from "./views/Clientes.jsx"
 import Ventas from "./views/ventas.jsx"
 import Proveedores from './views/Proveedores';
+import Compra from "./views/Compras.jsx";
 import Dashboard from "./views/Dashboard.jsx";
 
-import "./App.css";
 
+import "./App.css";
+import Compras from "./views/Compras.jsx";
 import './App.css';
 import Clientes from './views/Clientes.jsx';
 
@@ -41,6 +43,7 @@ const App = () => {
           <Route path="/ventas" element={<RutaProtegida><Ventas /></RutaProtegida>} />
           <Route path="/dashboard" element={<RutaProtegida><Dashboard /></RutaProtegida>} />
           <Route path="/proveedores" element={<RutaProtegida><Proveedores /></RutaProtegida>} />
+          <Route path="/compras" element={<RutaProtegida><Compras /></RutaProtegida>} />
 
 
           <Route path="*" element={<Pagina404 />} />
@@ -50,6 +53,5 @@ const App = () => {
     </Router>
   );
 }
-
 
 export default App;
