@@ -1,14 +1,30 @@
 import React from "react";
-import { Table, Button } from "react-bootstrap";
+import { Table, Button, Badge } from "react-bootstrap";
 
-const TablaCompras = ({ compras, abrirEdicion }) => {
+const TablaCompras = ({ compras, abrirEdicion, verDetalles }) => {
+
+  const formatearFecha = (fecha) => {
+    if (!fecha) return "Sin fecha";
+    return new Date(fecha).toLocaleString("es-NI", {
+      dateStyle: "short",
+      timeStyle: "short"
+    });
+  };
+
+  const formatearMoneda = (valor) => {
+    return new Intl.NumberFormat("es-NI", {
+      style: "currency",
+      currency: "NIO",
+    }).format(valor || 0);
+  };
+
   return (
-    <Table striped hover responsive size="sm">
-      <thead>
+    <Table striped hover responsive size="sm" className="align-middle">
+      <thead className="table-dark">
         <tr>
           <th>ID</th>
           <th>Fecha</th>
-          <th>Factura Proveedor</th>
+          <th>Factura</th>
           <th>Proveedor</th>
           <th>Empleado</th>
           <th className="text-end">Total</th>
@@ -18,50 +34,67 @@ const TablaCompras = ({ compras, abrirEdicion }) => {
       </thead>
 
       <tbody>
-        {compras.map((compra) => (
-          <tr key={compra.compra_id}>
-            <td>#{compra.compra_id}</td>
+        {compras.length > 0 ? (
+          compras.map((compra) => (
+            <tr key={compra.compra_id}>
+              <td>#{compra.compra_id}</td>
 
-            <td>
-              {compra.fecha_compra
-                ? new Date(compra.fecha_compra).toLocaleString("es-NI")
-                : "Sin fecha"}
-            </td>
+              <td>{formatearFecha(compra.fecha_compra)}</td>
 
-            <td>{compra.numero_factura_proveedor}</td>
+              <td>
+                {compra.numero_factura_proveedor || "—"}
+              </td>
 
-            <td>
-              {compra.proveedores?.nombre_proveedor}
-            </td>
+              <td>
+                {compra.proveedores?.nombre_proveedor || "Sin proveedor"}
+              </td>
 
-            <td>
-              {compra.empleados?.nombre_empleado}{" "}
-              {compra.empleados?.apellido_empleado}
-            </td>
+              <td>
+                {compra.empleados
+                  ? `${compra.empleados.nombre_empleado} ${compra.empleados.apellido_empleado}`
+                  : "Sin empleado"}
+              </td>
 
-            <td className="text-end fw-bold">
-              C$ {parseFloat(compra.total_compra || 0).toFixed(2)}
-            </td>
+              <td className="text-end fw-bold text-success">
+                {formatearMoneda(compra.total_compra)}
+              </td>
 
-            <td>
-              {compra.activo ? (
-                <span className="badge bg-success">Activo</span>
-              ) : (
-                <span className="badge bg-secondary">Inactivo</span>
-              )}
-            </td>
+              <td>
+                <Badge bg={compra.activo ? "success" : "secondary"}>
+                  {compra.activo ? "Activo" : "Inactivo"}
+                </Badge>
+              </td>
 
-            <td className="text-center">
-              <Button
-                variant="outline-warning"
-                size="sm"
-                onClick={() => abrirEdicion(compra)}
-              >
-                <i className="bi bi-pencil"></i>
-              </Button>
+              <td className="text-center d-flex justify-content-center gap-2">
+                {/* 🔍 Ver detalle */}
+                {verDetalles && (
+                  <Button
+                    variant="outline-info"
+                    size="sm"
+                    onClick={() => verDetalles(compra)}
+                  >
+                    <i className="bi bi-eye"></i>
+                  </Button>
+                )}
+
+                {/* ✏️ Editar */}
+                <Button
+                  variant="outline-warning"
+                  size="sm"
+                  onClick={() => abrirEdicion(compra)}
+                >
+                  <i className="bi bi-pencil"></i>
+                </Button>
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="8" className="text-center text-muted py-3">
+              No hay compras registradas
             </td>
           </tr>
-        ))}
+        )}
       </tbody>
     </Table>
   );

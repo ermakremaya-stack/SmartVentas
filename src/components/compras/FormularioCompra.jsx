@@ -1,32 +1,75 @@
-import React from "react";
-import { Modal, Row, Col, Form, Button } from "react-bootstrap";
+import React, { useState } from "react";
+import { Modal, Row, Col, Form, Button, Table } from "react-bootstrap";
 
 const FormularioCompra = ({
   mostrar,
   setMostrar,
   proveedores,
   empleados,
+  productos,
   proveedorSeleccionado,
   setProveedorSeleccionado,
   empleadoSeleccionado,
   setEmpleadoSeleccionado,
   fechaCompra,
   setFechaCompra,
-  totalCompra,
-  setTotalCompra,
   numeroFacturaProveedor,
   setNumeroFacturaProveedor,
+  detalles,
+  setDetalles,
+  totalCompra,
   guardarCompra,
   compraAEditar
 }) => {
+
+  const [productoSeleccionado, setProductoSeleccionado] = useState(null);
+  const [cantidad, setCantidad] = useState(1);
+  const [precio, setPrecio] = useState(0);
+
+  // ✅ Agregar producto
+  const agregarDetalle = () => {
+    if (!productoSeleccionado || cantidad <= 0 || precio <= 0) return;
+
+    setDetalles(prev => {
+      const existe = prev.find(p => p.producto_id === productoSeleccionado.producto_id);
+
+      if (existe) {
+        return prev.map(p =>
+          p.producto_id === productoSeleccionado.producto_id
+            ? { ...p, cantidad: p.cantidad + cantidad }
+            : p
+        );
+      }
+
+      return [
+        ...prev,
+        {
+          producto_id: productoSeleccionado.producto_id,
+          nombre_producto: productoSeleccionado.nombre_producto,
+          cantidad,
+          precio
+        }
+      ];
+    });
+
+    setCantidad(1);
+    setPrecio(0);
+    setProductoSeleccionado(null);
+  };
+
+  // ✅ Eliminar producto
+  const eliminarDetalle = (id) => {
+    setDetalles(prev => prev.filter(p => p.producto_id !== id));
+  };
+
+  // ✅ Calcular total
+  const totalCalculado = detalles.reduce(
+    (sum, d) => sum + d.cantidad * d.precio,
+    0
+  );
+
   return (
-    <Modal
-      show={mostrar}
-      onHide={() => setMostrar(false)}
-      backdrop="static"
-      size="lg"
-      centered
-    >
+    <Modal show={mostrar} onHide={() => setMostrar(false)} size="lg" centered>
       <Modal.Header closeButton>
         <Modal.Title>
           {compraAEditar ? "Editar Compra" : "Nueva Compra"}
@@ -35,97 +78,160 @@ const FormularioCompra = ({
 
       <Modal.Body>
         <Row>
-          <Col md={12}>
-            <h5>Datos de la Compra</h5>
-
+          <Col md={6}>
             <Form.Group className="mb-3">
               <Form.Label>Proveedor *</Form.Label>
               <Form.Select
                 value={proveedorSeleccionado?.proveedor_id || ""}
                 onChange={(e) => {
                   const proveedor = proveedores.find(
-                    (p) => p.proveedor_id === Number(e.target.value)
+                    p => p.proveedor_id === Number(e.target.value)
                   );
                   setProveedorSeleccionado(proveedor || null);
                 }}
               >
-                <option value="">Seleccionar proveedor...</option>
-
-                {proveedores.map((proveedor) => (
-                  <option
-                    key={proveedor.proveedor_id}
-                    value={proveedor.proveedor_id}
-                  >
-                    {proveedor.nombre_proveedor}
+                <option value="">Seleccionar...</option>
+                {proveedores.map(p => (
+                  <option key={p.proveedor_id} value={p.proveedor_id}>
+                    {p.nombre_proveedor}
                   </option>
                 ))}
               </Form.Select>
             </Form.Group>
+          </Col>
 
+          <Col md={6}>
             <Form.Group className="mb-3">
               <Form.Label>Empleado *</Form.Label>
               <Form.Select
                 value={empleadoSeleccionado?.empleado_id || ""}
                 onChange={(e) => {
-                  const empleado = empleados.find(
-                    (emp) => emp.empleado_id === Number(e.target.value)
+                  const emp = empleados.find(
+                    x => x.empleado_id === Number(e.target.value)
                   );
-                  setEmpleadoSeleccionado(empleado || null);
+                  setEmpleadoSeleccionado(emp || null);
                 }}
               >
-                <option value="">Seleccionar empleado...</option>
-
-                {empleados.map((empleado) => (
-                  <option
-                    key={empleado.empleado_id}
-                    value={empleado.empleado_id}
-                  >
-                    {empleado.nombre_empleado} {empleado.apellido_empleado}
+                <option value="">Seleccionar...</option>
+                {empleados.map(e => (
+                  <option key={e.empleado_id} value={e.empleado_id}>
+                    {e.nombre_empleado} {e.apellido_empleado}
                   </option>
                 ))}
               </Form.Select>
             </Form.Group>
+          </Col>
+        </Row>
 
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Número de Factura del Proveedor *</Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Ej: FAC-00125"
-                    value={numeroFacturaProveedor}
-                    onChange={(e) =>
-                      setNumeroFacturaProveedor(e.target.value)
-                    }
-                  />
-                </Form.Group>
-              </Col>
-
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Fecha de Compra *</Form.Label>
-                  <Form.Control
-                    type="datetime-local"
-                    value={fechaCompra}
-                    onChange={(e) => setFechaCompra(e.target.value)}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-
+        <Row>
+          <Col md={6}>
             <Form.Group className="mb-3">
-              <Form.Label>Total de la Compra *</Form.Label>
+              <Form.Label>Factura *</Form.Label>
               <Form.Control
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-                value={totalCompra}
-                onChange={(e) => setTotalCompra(e.target.value)}
+                value={numeroFacturaProveedor}
+                onChange={e => setNumeroFacturaProveedor(e.target.value)}
+              />
+            </Form.Group>
+          </Col>
+
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Fecha *</Form.Label>
+              <Form.Control
+                type="datetime-local"
+                value={fechaCompra}
+                onChange={e => setFechaCompra(e.target.value)}
               />
             </Form.Group>
           </Col>
         </Row>
+
+        <hr />
+
+        {/* ✅ AGREGAR PRODUCTOS */}
+        <h5>Agregar Productos</h5>
+
+        <Row className="mb-2">
+          <Col md={4}>
+            <Form.Select
+              value={productoSeleccionado?.producto_id || ""}
+              onChange={(e) => {
+                const prod = productos.find(
+                  p => p.producto_id === Number(e.target.value)
+                );
+                setProductoSeleccionado(prod || null);
+              }}
+            >
+              <option value="">Producto...</option>
+              {productos.map(p => (
+                <option key={p.producto_id} value={p.producto_id}>
+                  {p.nombre_producto}
+                </option>
+              ))}
+            </Form.Select>
+          </Col>
+
+          <Col md={2}>
+            <Form.Control
+              type="number"
+              placeholder="Cant"
+              value={cantidad}
+              onChange={(e) => setCantidad(Number(e.target.value))}
+            />
+          </Col>
+
+          <Col md={3}>
+            <Form.Control
+              type="number"
+              placeholder="Precio compra"
+              value={precio}
+              onChange={(e) => setPrecio(Number(e.target.value))}
+            />
+          </Col>
+
+          <Col md={3}>
+            <Button onClick={agregarDetalle} className="w-100">
+              Agregar
+            </Button>
+          </Col>
+        </Row>
+
+        {/* ✅ TABLA DETALLES */}
+        <Table striped bordered size="sm">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio</th>
+              <th>Subtotal</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {detalles.map(d => (
+              <tr key={d.producto_id}>
+                <td>{d.nombre_producto}</td>
+                <td>{d.cantidad}</td>
+                <td>{d.precio}</td>
+                <td>{d.cantidad * d.precio}</td>
+                <td>
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    onClick={() => eliminarDetalle(d.producto_id)}
+                  >
+                    X
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+
+        {/* ✅ TOTAL AUTOMÁTICO */}
+        <h5 className="text-end">
+          Total: {totalCalculado.toFixed(2)}
+        </h5>
       </Modal.Body>
 
       <Modal.Footer>
@@ -134,17 +240,14 @@ const FormularioCompra = ({
         </Button>
 
         <Button
-          variant="primary"
           onClick={guardarCompra}
           disabled={
             !proveedorSeleccionado ||
             !empleadoSeleccionado ||
-            !fechaCompra ||
-            !numeroFacturaProveedor.trim() ||
-            Number(totalCompra) <= 0
+            detalles.length === 0
           }
         >
-          {compraAEditar ? "Actualizar Compra" : "Registrar Compra"}
+          {compraAEditar ? "Actualizar" : "Guardar"}
         </Button>
       </Modal.Footer>
     </Modal>
