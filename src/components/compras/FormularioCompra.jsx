@@ -4,9 +4,9 @@ import { Modal, Row, Col, Form, Button, Table } from "react-bootstrap";
 const FormularioCompra = ({
   mostrar,
   setMostrar,
-  proveedores,
-  empleados,
-  productos,
+  proveedores = [],
+  empleados = [],
+  productos = [],
   proveedorSeleccionado,
   setProveedorSeleccionado,
   empleadoSeleccionado,
@@ -15,7 +15,7 @@ const FormularioCompra = ({
   setFechaCompra,
   numeroFacturaProveedor,
   setNumeroFacturaProveedor,
-  detalles,
+  detalles = [],
   setDetalles,
   totalCompra,
   guardarCompra,
@@ -26,17 +26,77 @@ const FormularioCompra = ({
   const [cantidad, setCantidad] = useState(1);
   const [precio, setPrecio] = useState(0);
 
-  // ✅ Agregar producto
+  // ================= IDS SEGUROS =================
+  const obtenerIdProveedor = (proveedor) => {
+    return proveedor?.proveedor_id ?? proveedor?.id_proveedor;
+  };
+
+  const obtenerIdEmpleado = (empleado) => {
+    return empleado?.empleado_id ?? empleado?.id_empleado;
+  };
+
+  const obtenerIdProducto = (producto) => {
+    return producto?.producto_id ?? producto?.id_producto;
+  };
+
+  // ================= NOMBRES SEGUROS =================
+  const obtenerNombreProveedor = (proveedor) => {
+    const idProveedor = obtenerIdProveedor(proveedor);
+
+    return String(
+      proveedor?.nombre_proveedor ||
+      proveedor?.nombre ||
+      proveedor?.nombre_empresa ||
+      proveedor?.razon_social ||
+      proveedor?.empresa ||
+      proveedor?.nombre_contacto ||
+      proveedor?.contacto ||
+      `Proveedor ${idProveedor}`
+    );
+  };
+
+  const obtenerNombreEmpleado = (empleado) => {
+    const idEmpleado = obtenerIdEmpleado(empleado);
+
+    return String(
+      `${empleado?.nombre_empleado || empleado?.nombre || empleado?.nombre1 || ""} ${
+        empleado?.apellido_empleado || empleado?.apellido || empleado?.apellido1 || ""
+      }`.trim() ||
+      `Empleado ${idEmpleado}`
+    );
+  };
+
+  const obtenerNombreProducto = (producto) => {
+    const idProducto = obtenerIdProducto(producto);
+
+    return String(
+      producto?.nombre_producto ||
+      producto?.nombre ||
+      producto?.descripcion ||
+      `Producto ${idProducto}`
+    );
+  };
+
+  // ================= SUBTOTAL AUTOMÁTICO =================
+  const subtotalActual = Number(cantidad || 0) * Number(precio || 0);
+
+  // ================= AGREGAR PRODUCTO =================
   const agregarDetalle = () => {
     if (!productoSeleccionado || cantidad <= 0 || precio <= 0) return;
 
+    const idProducto = obtenerIdProducto(productoSeleccionado);
+
     setDetalles(prev => {
-      const existe = prev.find(p => p.producto_id === productoSeleccionado.producto_id);
+      const existe = prev.find(p => Number(p.producto_id) === Number(idProducto));
 
       if (existe) {
         return prev.map(p =>
-          p.producto_id === productoSeleccionado.producto_id
-            ? { ...p, cantidad: p.cantidad + cantidad }
+          Number(p.producto_id) === Number(idProducto)
+            ? {
+                ...p,
+                cantidad: Number(p.cantidad) + Number(cantidad),
+                subtotal: (Number(p.cantidad) + Number(cantidad)) * Number(p.precio)
+              }
             : p
         );
       }
@@ -44,10 +104,11 @@ const FormularioCompra = ({
       return [
         ...prev,
         {
-          producto_id: productoSeleccionado.producto_id,
-          nombre_producto: productoSeleccionado.nombre_producto,
-          cantidad,
-          precio
+          producto_id: idProducto,
+          nombre_producto: obtenerNombreProducto(productoSeleccionado),
+          cantidad: Number(cantidad),
+          precio: Number(precio),
+          subtotal: Number(cantidad) * Number(precio)
         }
       ];
     });
@@ -57,14 +118,14 @@ const FormularioCompra = ({
     setProductoSeleccionado(null);
   };
 
-  // ✅ Eliminar producto
+  // ================= ELIMINAR PRODUCTO =================
   const eliminarDetalle = (id) => {
-    setDetalles(prev => prev.filter(p => p.producto_id !== id));
+    setDetalles(prev => prev.filter(p => Number(p.producto_id) !== Number(id)));
   };
 
-  // ✅ Calcular total
+  // ================= TOTAL =================
   const totalCalculado = detalles.reduce(
-    (sum, d) => sum + d.cantidad * d.precio,
+    (sum, d) => sum + Number(d.cantidad || 0) * Number(d.precio || 0),
     0
   );
 
@@ -81,21 +142,35 @@ const FormularioCompra = ({
           <Col md={6}>
             <Form.Group className="mb-3">
               <Form.Label>Proveedor *</Form.Label>
+
               <Form.Select
-                value={proveedorSeleccionado?.proveedor_id || ""}
+                value={
+                  proveedorSeleccionado
+                    ? obtenerIdProveedor(proveedorSeleccionado)
+                    : ""
+                }
                 onChange={(e) => {
                   const proveedor = proveedores.find(
-                    p => p.proveedor_id === Number(e.target.value)
+                    p => Number(obtenerIdProveedor(p)) === Number(e.target.value)
                   );
+
                   setProveedorSeleccionado(proveedor || null);
                 }}
               >
                 <option value="">Seleccionar...</option>
-                {proveedores.map(p => (
-                  <option key={p.proveedor_id} value={p.proveedor_id}>
-                    {p.nombre_proveedor}
-                  </option>
-                ))}
+
+                {proveedores.map((p, index) => {
+                  const idProveedor = obtenerIdProveedor(p);
+
+                  return (
+                    <option
+                      key={idProveedor || `proveedor-${index}`}
+                      value={idProveedor || ""}
+                    >
+                      {obtenerNombreProveedor(p)}
+                    </option>
+                  );
+                })}
               </Form.Select>
             </Form.Group>
           </Col>
@@ -103,21 +178,35 @@ const FormularioCompra = ({
           <Col md={6}>
             <Form.Group className="mb-3">
               <Form.Label>Empleado *</Form.Label>
+
               <Form.Select
-                value={empleadoSeleccionado?.empleado_id || ""}
+                value={
+                  empleadoSeleccionado
+                    ? obtenerIdEmpleado(empleadoSeleccionado)
+                    : ""
+                }
                 onChange={(e) => {
                   const emp = empleados.find(
-                    x => x.empleado_id === Number(e.target.value)
+                    x => Number(obtenerIdEmpleado(x)) === Number(e.target.value)
                   );
+
                   setEmpleadoSeleccionado(emp || null);
                 }}
               >
                 <option value="">Seleccionar...</option>
-                {empleados.map(e => (
-                  <option key={e.empleado_id} value={e.empleado_id}>
-                    {e.nombre_empleado} {e.apellido_empleado}
-                  </option>
-                ))}
+
+                {empleados.map((e, index) => {
+                  const idEmpleado = obtenerIdEmpleado(e);
+
+                  return (
+                    <option
+                      key={idEmpleado || `empleado-${index}`}
+                      value={idEmpleado || ""}
+                    >
+                      {obtenerNombreEmpleado(e)}
+                    </option>
+                  );
+                })}
               </Form.Select>
             </Form.Group>
           </Col>
@@ -130,6 +219,7 @@ const FormularioCompra = ({
               <Form.Control
                 value={numeroFacturaProveedor}
                 onChange={e => setNumeroFacturaProveedor(e.target.value)}
+                placeholder="Ej: FAC-00125"
               />
             </Form.Group>
           </Col>
@@ -148,89 +238,137 @@ const FormularioCompra = ({
 
         <hr />
 
-        {/* ✅ AGREGAR PRODUCTOS */}
         <h5>Agregar Productos</h5>
 
         <Row className="mb-2">
-          <Col md={4}>
+          <Col md={3}>
+            <Form.Label>Producto</Form.Label>
             <Form.Select
-              value={productoSeleccionado?.producto_id || ""}
+              value={
+                productoSeleccionado
+                  ? obtenerIdProducto(productoSeleccionado)
+                  : ""
+              }
               onChange={(e) => {
                 const prod = productos.find(
-                  p => p.producto_id === Number(e.target.value)
+                  p => Number(obtenerIdProducto(p)) === Number(e.target.value)
                 );
+
                 setProductoSeleccionado(prod || null);
+
+                if (prod?.precio_compra) {
+                  setPrecio(Number(prod.precio_compra));
+                } else if (prod?.precio_unitario_compra) {
+                  setPrecio(Number(prod.precio_unitario_compra));
+                } else if (prod?.precio_venta) {
+                  setPrecio(Number(prod.precio_venta));
+                } else {
+                  setPrecio(0);
+                }
+
+                setCantidad(1);
               }}
             >
               <option value="">Producto...</option>
-              {productos.map(p => (
-                <option key={p.producto_id} value={p.producto_id}>
-                  {p.nombre_producto}
-                </option>
-              ))}
+
+              {productos.map((p, index) => {
+                const idProducto = obtenerIdProducto(p);
+
+                return (
+                  <option
+                    key={idProducto || `producto-${index}`}
+                    value={idProducto || ""}
+                  >
+                    {obtenerNombreProducto(p)}
+                  </option>
+                );
+              })}
             </Form.Select>
           </Col>
 
           <Col md={2}>
+            <Form.Label>Cantidad</Form.Label>
             <Form.Control
               type="number"
+              min="1"
               placeholder="Cant"
               value={cantidad}
               onChange={(e) => setCantidad(Number(e.target.value))}
             />
           </Col>
 
-          <Col md={3}>
+          <Col md={2}>
+            <Form.Label>Precio unitario</Form.Label>
             <Form.Control
               type="number"
+              min="0"
+              step="0.01"
               placeholder="Precio compra"
               value={precio}
               onChange={(e) => setPrecio(Number(e.target.value))}
             />
           </Col>
 
-          <Col md={3}>
+          <Col md={2}>
+            <Form.Label>Subtotal</Form.Label>
+            <Form.Control
+              type="number"
+              value={subtotalActual.toFixed(2)}
+              readOnly
+            />
+          </Col>
+
+          <Col md={3} className="d-flex align-items-end">
             <Button onClick={agregarDetalle} className="w-100">
               Agregar
             </Button>
           </Col>
         </Row>
 
-        {/* ✅ TABLA DETALLES */}
         <Table striped bordered size="sm">
           <thead>
             <tr>
               <th>Producto</th>
               <th>Cantidad</th>
-              <th>Precio</th>
+              <th>Precio Unitario</th>
               <th>Subtotal</th>
               <th></th>
             </tr>
           </thead>
+
           <tbody>
-            {detalles.map(d => (
-              <tr key={d.producto_id}>
-                <td>{d.nombre_producto}</td>
-                <td>{d.cantidad}</td>
-                <td>{d.precio}</td>
-                <td>{d.cantidad * d.precio}</td>
-                <td>
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={() => eliminarDetalle(d.producto_id)}
-                  >
-                    X
-                  </Button>
+            {detalles.length > 0 ? (
+              detalles.map((d, index) => (
+                <tr key={d.producto_id || `detalle-${index}`}>
+                  <td>{d.nombre_producto}</td>
+                  <td>{d.cantidad}</td>
+                  <td>C$ {Number(d.precio || 0).toFixed(2)}</td>
+                  <td>
+                    C$ {(Number(d.cantidad || 0) * Number(d.precio || 0)).toFixed(2)}
+                  </td>
+                  <td>
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      onClick={() => eliminarDetalle(d.producto_id)}
+                    >
+                      X
+                    </Button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" className="text-center text-muted">
+                  No hay productos agregados
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </Table>
 
-        {/* ✅ TOTAL AUTOMÁTICO */}
         <h5 className="text-end">
-          Total: {totalCalculado.toFixed(2)}
+          Total: C$ {totalCalculado.toFixed(2)}
         </h5>
       </Modal.Body>
 
