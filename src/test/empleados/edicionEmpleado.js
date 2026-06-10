@@ -5,7 +5,7 @@ function edicionEmpleado(empleadoEditado, listaEmpleadosExistentes = []) {
   if (!id_empleado || !nombre_empleado || !apellido_empleado || !email || !celular || !pin || !tipo_empleado) {
     return { valido: false, mensaje: "Completa todos los campos requeridos." };
   }
-
+   
   // 2. Validar formato del correo (mismo que registro)
   const posicionArroba = email.indexOf('@');
   if (posicionArroba <= 0 || posicionArroba === email.length - 1 || email.split('@').length - 1 !== 1) {
