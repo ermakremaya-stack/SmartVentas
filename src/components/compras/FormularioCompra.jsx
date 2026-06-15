@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Modal, Row, Col, Form, Button, Table } from "react-bootstrap";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 const FormularioCompra = ({
   mostrar,
@@ -16,6 +17,8 @@ const FormularioCompra = ({
   setFechaCompra,
   numeroFacturaProveedor,
   setNumeroFacturaProveedor,
+  activoCompra,
+  setActivoCompra,
   detalles = [],
   setDetalles,
   totalCompra,
@@ -27,7 +30,6 @@ const FormularioCompra = ({
   const [precio, setPrecio] = useState(0);
   const [deshabilitado, setDeshabilitado] = useState(false);
 
-  // ================= CERRAR MODAL =================
   const cerrarModal = () => {
     setMostrar(false);
 
@@ -40,7 +42,6 @@ const FormularioCompra = ({
     setPrecio(0);
   };
 
-  // ================= IDS SEGUROS =================
   const obtenerIdProveedor = (proveedor) => {
     return proveedor?.proveedor_id ?? proveedor?.id_proveedor;
   };
@@ -53,7 +54,6 @@ const FormularioCompra = ({
     return producto?.producto_id ?? producto?.id_producto;
   };
 
-  // ================= NOMBRES SEGUROS =================
   const obtenerNombreProveedor = (proveedor) => {
     const idProveedor = obtenerIdProveedor(proveedor);
 
@@ -93,10 +93,8 @@ const FormularioCompra = ({
     );
   };
 
-  // ================= SUBTOTAL AUTOMÁTICO =================
   const subtotalActual = Number(cantidad || 0) * Number(precio || 0);
 
-  // ================= AGREGAR PRODUCTO =================
   const agregarDetalle = () => {
     if (!productoSeleccionado || cantidad <= 0 || precio <= 0) return;
 
@@ -137,20 +135,17 @@ const FormularioCompra = ({
     setProductoSeleccionado(null);
   };
 
-  // ================= ELIMINAR PRODUCTO =================
   const eliminarDetalle = (id) => {
     setDetalles((prev) =>
       prev.filter((p) => Number(p.producto_id) !== Number(id))
     );
   };
 
-  // ================= TOTAL =================
   const totalCalculado = detalles.reduce(
     (sum, d) => sum + Number(d.cantidad || 0) * Number(d.precio || 0),
     0
   );
 
-  // ================= GUARDAR / ACTUALIZAR =================
   const manejarGuardar = async () => {
     if (deshabilitado) return;
 
@@ -229,7 +224,8 @@ const FormularioCompra = ({
                 }
                 onChange={(e) => {
                   const emp = empleados.find(
-                    (x) => Number(obtenerIdEmpleado(x)) === Number(e.target.value)
+                    (x) =>
+                      Number(obtenerIdEmpleado(x)) === Number(e.target.value)
                   );
 
                   setEmpleadoSeleccionado(emp || null);
@@ -278,6 +274,38 @@ const FormularioCompra = ({
           </Col>
         </Row>
 
+        <Row>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Estado de la compra *</Form.Label>
+
+              <Form.Select
+                value={activoCompra ? "activo" : "inactivo"}
+                onChange={(e) => setActivoCompra(e.target.value === "activo")}
+              >
+                <option value="activo">Activo</option>
+                <option value="inactivo">Inactivo</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+
+          <Col md={6} className="d-flex align-items-center">
+            <div className="mt-3">
+              {activoCompra ? (
+                <span className="badge bg-success">
+                  <i className="bi bi-unlock-fill me-1"></i>
+                  Compra activa
+                </span>
+              ) : (
+                <span className="badge bg-secondary">
+                  <i className="bi bi-lock-fill me-1"></i>
+                  Compra inactiva
+                </span>
+              )}
+            </div>
+          </Col>
+        </Row>
+
         <hr />
 
         <h5>Agregar Productos</h5>
@@ -285,6 +313,7 @@ const FormularioCompra = ({
         <Row className="mb-2">
           <Col md={3}>
             <Form.Label>Producto</Form.Label>
+
             <Form.Select
               value={
                 productoSeleccionado
@@ -417,9 +446,7 @@ const FormularioCompra = ({
           </tbody>
         </Table>
 
-        <h5 className="text-end">
-          Total: C$ {totalCalculado.toFixed(2)}
-        </h5>
+        <h5 className="text-end">Total: C$ {totalCalculado.toFixed(2)}</h5>
       </Modal.Body>
 
       <Modal.Footer>

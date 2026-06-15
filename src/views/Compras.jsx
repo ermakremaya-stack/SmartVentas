@@ -24,6 +24,7 @@ const Compras = () => {
   const [fechaCompra, setFechaCompra] = useState("");
   const [numeroFacturaProveedor, setNumeroFacturaProveedor] = useState("");
   const [totalCompra, setTotalCompra] = useState(0);
+  const [activoCompra, setActivoCompra] = useState(true);
 
   const [detalles, setDetalles] = useState([]);
 
@@ -102,6 +103,14 @@ const Compras = () => {
     );
   };
 
+  // ================= CALCULAR TOTAL DETALLES =================
+  const calcularTotalDetalles = () => {
+    return detalles.reduce(
+      (sum, d) => sum + Number(d.cantidad || 0) * Number(d.precio || 0),
+      0
+    );
+  };
+
   // ================= CARGAR COMPRAS =================
   const cargarCompras = async () => {
     setCargando(true);
@@ -161,14 +170,9 @@ const Compras = () => {
     cargarDatosAuxiliares();
   }, []);
 
-  // ================= CALCULAR TOTAL =================
+  // ================= ACTUALIZAR TOTAL =================
   useEffect(() => {
-    const total = detalles.reduce(
-      (sum, d) => sum + Number(d.cantidad || 0) * Number(d.precio || 0),
-      0
-    );
-
-    setTotalCompra(total);
+    setTotalCompra(calcularTotalDetalles());
   }, [detalles]);
 
   // ================= BÚSQUEDA =================
@@ -192,7 +196,9 @@ const Compras = () => {
         return (
           String(c.proveedor_id || "").toLowerCase().includes(texto) ||
           String(c.empleado_id || "").toLowerCase().includes(texto) ||
-          String(c.numero_factura_proveedor || "").toLowerCase().includes(texto) ||
+          String(c.numero_factura_proveedor || "")
+            .toLowerCase()
+            .includes(texto) ||
           proveedorNombre.includes(texto) ||
           empleadoNombre.includes(texto) ||
           estadoCompra.includes(texto)
@@ -212,6 +218,7 @@ const Compras = () => {
     setFechaCompra("");
     setNumeroFacturaProveedor("");
     setTotalCompra(0);
+    setActivoCompra(true);
     setDetalles([]);
     setCompraAEditar(null);
   };
@@ -226,6 +233,7 @@ const Compras = () => {
       .slice(0, 16);
 
     setFechaCompra(fechaActual);
+    setActivoCompra(true);
     setMostrarFormulario(true);
   };
 
@@ -253,6 +261,7 @@ const Compras = () => {
 
       setNumeroFacturaProveedor(compra.numero_factura_proveedor || "");
       setTotalCompra(Number(compra.total_compra || 0));
+      setActivoCompra(Boolean(compra.activo));
 
       const { data, error } = await supabase
         .from("detalle_compras")
@@ -312,6 +321,8 @@ const Compras = () => {
     }
 
     try {
+      const totalActual = calcularTotalDetalles();
+
       const { data: compraInsertada, error: errorCompra } = await supabase
         .from("compras")
         .insert([
@@ -319,9 +330,9 @@ const Compras = () => {
             proveedor_id: obtenerIdProveedor(proveedorSeleccionado),
             empleado_id: obtenerIdEmpleado(empleadoSeleccionado),
             fecha_compra: fechaCompra || new Date().toISOString(),
-            total_compra: totalCompra,
+            total_compra: totalActual,
             numero_factura_proveedor: numeroFacturaProveedor,
-            activo: true,
+            activo: activoCompra,
           },
         ])
         .select()
@@ -345,7 +356,9 @@ const Compras = () => {
 
       setToast({
         mostrar: true,
-        mensaje: "Compra registrada correctamente",
+        mensaje: `Compra registrada correctamente como ${
+          activoCompra ? "activa" : "inactiva"
+        }`,
         tipo: "exito",
       });
 
@@ -362,94 +375,43 @@ const Compras = () => {
       });
     }
   };
+// ================= ACTUALIZAR SOLO ESTADO DE COMPRA =================
+const actualizarCompra = async () => {
+  if (!compraAEditar) return;
 
-  // ================= ACTUALIZAR COMPRA =================
-  const actualizarCompra = async () => {
-    if (!compraAEditar) return;
+  try {
+    const { error } = await supabase
+      .from("compras")
+      .update({
+        activo: activoCompra,
+      })
+      .eq("compra_id", compraAEditar.compra_id);
 
-    if (!proveedorSeleccionado || !empleadoSeleccionado) {
-      setToast({
-        mostrar: true,
-        mensaje: "Debe seleccionar proveedor y empleado",
-        tipo: "advertencia",
-      });
-      return;
-    }
+    if (error) throw error;
 
-    if (!numeroFacturaProveedor.trim()) {
-      setToast({
-        mostrar: true,
-        mensaje: "Debe ingresar el número de factura",
-        tipo: "advertencia",
-      });
-      return;
-    }
+    setToast({
+      mostrar: true,
+      mensaje: `Estado de la compra #${compraAEditar.compra_id} actualizado a ${
+        activoCompra ? "activa" : "inactiva"
+      }.`,
+      tipo: "exito",
+    });
 
-    if (detalles.length === 0) {
-      setToast({
-        mostrar: true,
-        mensaje: "Debe agregar al menos un producto a la compra",
-        tipo: "advertencia",
-      });
-      return;
-    }
+    setMostrarFormulario(false);
+    resetFormulario();
+    await cargarCompras();
+  } catch (err) {
+    console.error("Error actualizando estado de compra:", err.message);
 
-    try {
-      const { error: errorCompra } = await supabase
-        .from("compras")
-        .update({
-          proveedor_id: obtenerIdProveedor(proveedorSeleccionado),
-          empleado_id: obtenerIdEmpleado(empleadoSeleccionado),
-          fecha_compra: fechaCompra || new Date().toISOString(),
-          total_compra: totalCompra,
-          numero_factura_proveedor: numeroFacturaProveedor,
-        })
-        .eq("compra_id", compraAEditar.compra_id);
+    setToast({
+      mostrar: true,
+      mensaje: err.message || "Error al actualizar el estado de la compra",
+      tipo: "error",
+    });
+  }
+};
 
-      if (errorCompra) throw errorCompra;
-
-      const { error: errorEliminarDetalles } = await supabase
-        .from("detalle_compras")
-        .delete()
-        .eq("compra_id", compraAEditar.compra_id);
-
-      if (errorEliminarDetalles) throw errorEliminarDetalles;
-
-      const detallesActualizados = detalles.map((d) => ({
-        compra_id: compraAEditar.compra_id,
-        producto_id: d.producto_id,
-        cantidad_comprada: Number(d.cantidad),
-        precio_unitario_compra: Number(d.precio),
-        subtotal_compra: Number(d.cantidad) * Number(d.precio),
-      }));
-
-      const { error: errorDetalles } = await supabase
-        .from("detalle_compras")
-        .insert(detallesActualizados);
-
-      if (errorDetalles) throw errorDetalles;
-
-      setToast({
-        mostrar: true,
-        mensaje: "Compra actualizada correctamente",
-        tipo: "exito",
-      });
-
-      setMostrarFormulario(false);
-      resetFormulario();
-      await cargarCompras();
-    } catch (err) {
-      console.error("Error actualizando compra:", err.message);
-
-      setToast({
-        mostrar: true,
-        mensaje: err.message || "Error al actualizar compra",
-        tipo: "error",
-      });
-    }
-  };
-
-  // ================= CAMBIAR ESTADO ACTIVO / INACTIVO =================
+  // ================= CAMBIAR ESTADO DESDE TABLA =================
   const cambiarEstadoCompra = async (compra) => {
     try {
       const nuevoEstado = !compra.activo;
@@ -673,12 +635,13 @@ const Compras = () => {
         setEmpleadoSeleccionado={setEmpleadoSeleccionado}
         fechaCompra={fechaCompra}
         setFechaCompra={setFechaCompra}
-        totalCompra={totalCompra}
-        setTotalCompra={setTotalCompra}
         numeroFacturaProveedor={numeroFacturaProveedor}
         setNumeroFacturaProveedor={setNumeroFacturaProveedor}
+        activoCompra={activoCompra}
+        setActivoCompra={setActivoCompra}
         detalles={detalles}
         setDetalles={setDetalles}
+        totalCompra={totalCompra}
         guardarCompra={compraAEditar ? actualizarCompra : guardarCompra}
         compraAEditar={compraAEditar}
       />
