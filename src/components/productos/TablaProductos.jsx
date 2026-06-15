@@ -1,5 +1,5 @@
 import React from "react";
-import { Table, Spinner, Button } from "react-bootstrap";
+import { Table, Spinner, Button, Badge } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 const TablaProductos = ({
@@ -29,7 +29,7 @@ const TablaProductos = ({
               <th>Categoría ID</th>
               <th className="d-none d-md-table-cell">Precio Compra</th>
               <th className="d-none d-md-table-cell">Precio Venta</th>
-              <th className="d-none d-md-table-cell">Activo</th>
+              <th className="d-none d-md-table-cell">Estado</th>
               <th className="text-center">Acciones</th>
             </tr>
           </thead>
@@ -38,16 +38,35 @@ const TablaProductos = ({
             {productos.map((producto) => (
               <tr key={producto.producto_id}>
                 <td>{producto.producto_id}</td>
+
                 <td>{producto.nombre}</td>
+
                 <td>{producto.categoria_id}</td>
+
                 <td className="d-none d-md-table-cell">
-                  {producto.precio_compra}
+                  C$ {producto.precio_compra}
                 </td>
+
                 <td className="d-none d-md-table-cell">
-                  {producto.precio_venta}
+                  C$ {producto.precio_venta}
                 </td>
+
                 <td className="d-none d-md-table-cell">
-                  {producto.activo ? "Sí" : "No"}
+                  <Button
+                    variant={producto.activo ? "success" : "secondary"}
+                    size="sm"
+                    disabled
+                    className="px-3"
+                  >
+                    <i
+                      className={`bi ${
+                        producto.activo
+                          ? "bi-check-circle-fill"
+                          : "bi-x-circle-fill"
+                      } me-1`}
+                    ></i>
+                    {producto.activo ? "Activo" : "Inactivo"}
+                  </Button>
                 </td>
 
                 <td className="text-center">
@@ -55,6 +74,7 @@ const TablaProductos = ({
                     variant="outline-primary"
                     size="sm"
                     onClick={() => abrirModalEdicion(producto)}
+                    title="Editar producto"
                   >
                     <i className="bi bi-pencil"></i>
                   </Button>
@@ -64,6 +84,7 @@ const TablaProductos = ({
                     size="sm"
                     onClick={() => abrirModalEliminacion(producto)}
                     className="ms-2"
+                    title="Eliminar producto"
                   >
                     <i className="bi bi-trash"></i>
                   </Button>

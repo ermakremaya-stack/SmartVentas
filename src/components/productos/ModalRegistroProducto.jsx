@@ -12,9 +12,14 @@ const ModalRegistroProducto = ({
 
   const handleRegistrar = async () => {
     if (deshabilitado) return;
+
     setDeshabilitado(true);
-    await agregarProducto();
-    setDeshabilitado(false);
+
+    try {
+      await agregarProducto();
+    } finally {
+      setDeshabilitado(false);
+    }
   };
 
   return (
@@ -61,6 +66,8 @@ const ModalRegistroProducto = ({
               value={nuevoProducto?.precio_compra || ""}
               onChange={manejoCambioInput}
               placeholder="Ingresa el precio de compra"
+              min="0"
+              step="0.01"
             />
           </Form.Group>
 
@@ -72,6 +79,8 @@ const ModalRegistroProducto = ({
               value={nuevoProducto?.precio_venta || ""}
               onChange={manejoCambioInput}
               placeholder="Ingresa el precio de venta"
+              min="0"
+              step="0.01"
             />
           </Form.Group>
 
@@ -79,7 +88,7 @@ const ModalRegistroProducto = ({
             <Form.Check
               type="checkbox"
               name="activo"
-              label="Activo"
+              label="Producto activo"
               checked={nuevoProducto?.activo || false}
               onChange={manejoCambioInput}
             />
@@ -103,7 +112,7 @@ const ModalRegistroProducto = ({
             deshabilitado
           }
         >
-          Guardar
+          {deshabilitado ? "Guardando..." : "Guardar"}
         </Button>
       </Modal.Footer>
     </Modal>

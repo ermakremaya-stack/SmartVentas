@@ -35,6 +35,23 @@ const Productos = () => {
 
   const [mostrarModalEdicion, setMostrarModalEdicion] = useState(false);
 
+  const [productoEditar, setProductoEditar] = useState({
+    producto_id: "",
+    nombre: "",
+    categoria_id: "",
+    precio_compra: "",
+    precio_venta: "",
+    activo: true,
+  });
+
+  const [nuevoProducto, setNuevoProducto] = useState({
+    nombre: "",
+    categoria_id: "",
+    precio_compra: "",
+    precio_venta: "",
+    activo: true,
+  });
+
   const productosPaginados = productosFiltrados.slice(
     (paginaActual - 1) * registrosPorPagina,
     paginaActual * registrosPorPagina
@@ -53,32 +70,16 @@ const Productos = () => {
 
       const filtrados = productos.filter(
         (producto) =>
-          producto.nombre.toLowerCase().includes(textoLower) ||
+          producto.nombre?.toLowerCase().includes(textoLower) ||
           String(producto.categoria_id).includes(textoLower) ||
           String(producto.precio_compra).includes(textoLower) ||
-          String(producto.precio_venta).includes(textoLower)
+          String(producto.precio_venta).includes(textoLower) ||
+          (producto.activo ? "activo" : "inactivo").includes(textoLower)
       );
 
       setProductosFiltrados(filtrados);
     }
   }, [textoBusqueda, productos]);
-
-  const [productoEditar, setProductoEditar] = useState({
-    producto_id: "",
-    nombre: "",
-    categoria_id: "",
-    precio_compra: "",
-    precio_venta: "",
-    activo: true,
-  });
-
-  const [nuevoProducto, setNuevoProducto] = useState({
-    nombre: "",
-    categoria_id: "",
-    precio_compra: "",
-    precio_venta: "",
-    activo: true,
-  });
 
   const abrirModalEdicion = (producto) => {
     setProductoEditar({
@@ -143,6 +144,15 @@ const Productos = () => {
     }));
   };
 
+  const manejoCambioInputEdicion = (e) => {
+    const { name, value, type, checked } = e.target;
+
+    setProductoEditar((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
   const agregarProducto = async () => {
     try {
       if (
@@ -162,9 +172,9 @@ const Productos = () => {
       const { error } = await supabase.from("productos").insert([
         {
           nombre: nuevoProducto.nombre,
-          categoria_id: nuevoProducto.categoria_id,
-          precio_compra: nuevoProducto.precio_compra,
-          precio_venta: nuevoProducto.precio_venta,
+          categoria_id: Number(nuevoProducto.categoria_id),
+          precio_compra: Number(nuevoProducto.precio_compra),
+          precio_venta: Number(nuevoProducto.precio_venta),
           activo: nuevoProducto.activo,
         },
       ]);
@@ -228,9 +238,9 @@ const Productos = () => {
         .from("productos")
         .update({
           nombre: productoEditar.nombre,
-          categoria_id: productoEditar.categoria_id,
-          precio_compra: productoEditar.precio_compra,
-          precio_venta: productoEditar.precio_venta,
+          categoria_id: Number(productoEditar.categoria_id),
+          precio_compra: Number(productoEditar.precio_compra),
+          precio_venta: Number(productoEditar.precio_venta),
           activo: productoEditar.activo,
         })
         .eq("producto_id", productoEditar.producto_id);
@@ -290,6 +300,8 @@ const Productos = () => {
         mensaje: `Producto ${productoAEliminar.nombre} eliminado exitosamente.`,
         tipo: "exito",
       });
+
+      setProductoAEliminar(null);
     } catch (err) {
       console.error("Excepción al eliminar producto:", err.message);
       setToast({
@@ -300,21 +312,13 @@ const Productos = () => {
     }
   };
 
-  const manejoCambioInputEdicion = (e) => {
-    const { name, value, type, checked } = e.target;
-
-    setProductoEditar((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-
   return (
     <Container className="mt-3">
       <Row className="align-items-center mb-3">
         <Col xs={9} sm={7} lg={7} className="d-flex align-items-center">
           <h3 className="mb-0">
-            <i className="bi bi-box-seam-fill me-2"></i> Productos
+            <i className="bi bi-box-seam-fill me-2"></i>
+            Productos
           </h3>
         </Col>
 
@@ -337,15 +341,17 @@ const Productos = () => {
         </Row>
       )}
 
-      <Row className="mb-4">
-        <Col md={6} lg={5}>
-          <CuadroBusquedas
-            textoBusqueda={textoBusqueda}
-            manejarCambioBusqueda={manejarBusqueda}
-            placeholder="Buscar por nombre, categoría o precio..."
-          />
-        </Col>
-      </Row>
+      {!cargando && (
+        <Row className="mb-4">
+          <Col md={6} lg={5}>
+            <CuadroBusquedas
+              textoBusqueda={textoBusqueda}
+              manejarCambioBusqueda={manejarBusqueda}
+              placeholder="Buscar por nombre, categoría, precio o estado..."
+            />
+          </Col>
+        </Row>
+      )}
 
       {!cargando &&
         textoBusqueda.trim() &&
@@ -384,7 +390,7 @@ const Productos = () => {
         </Row>
       )}
 
-      {productosFiltrados.length > 0 && (
+      {!cargando && productosFiltrados.length > 0 && (
         <Paginacion
           registrosPorPagina={registrosPorPagina}
           totalRegistros={productosFiltrados.length}

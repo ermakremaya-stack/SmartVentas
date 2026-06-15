@@ -12,9 +12,14 @@ const ModalEdicionProducto = ({
 
   const handleActualizar = async () => {
     if (deshabilitado) return;
+
     setDeshabilitado(true);
-    await actualizarProducto();
-    setDeshabilitado(false);
+
+    try {
+      await actualizarProducto();
+    } finally {
+      setDeshabilitado(false);
+    }
   };
 
   return (
@@ -36,7 +41,7 @@ const ModalEdicionProducto = ({
             <Form.Control
               type="text"
               name="nombre"
-              value={productoEditar.nombre}
+              value={productoEditar.nombre || ""}
               onChange={manejoCambioInputEdicion}
               placeholder="Ingresa el nombre"
             />
@@ -47,7 +52,7 @@ const ModalEdicionProducto = ({
             <Form.Control
               type="number"
               name="categoria_id"
-              value={productoEditar.categoria_id}
+              value={productoEditar.categoria_id || ""}
               onChange={manejoCambioInputEdicion}
               placeholder="Ingresa el ID de la categoría"
             />
@@ -58,9 +63,11 @@ const ModalEdicionProducto = ({
             <Form.Control
               type="number"
               name="precio_compra"
-              value={productoEditar.precio_compra}
+              value={productoEditar.precio_compra || ""}
               onChange={manejoCambioInputEdicion}
               placeholder="Ingresa el precio de compra"
+              min="0"
+              step="0.01"
             />
           </Form.Group>
 
@@ -69,9 +76,11 @@ const ModalEdicionProducto = ({
             <Form.Control
               type="number"
               name="precio_venta"
-              value={productoEditar.precio_venta}
+              value={productoEditar.precio_venta || ""}
               onChange={manejoCambioInputEdicion}
               placeholder="Ingresa el precio de venta"
+              min="0"
+              step="0.01"
             />
           </Form.Group>
 
@@ -79,8 +88,8 @@ const ModalEdicionProducto = ({
             <Form.Check
               type="checkbox"
               name="activo"
-              label="Activo"
-              checked={productoEditar.activo}
+              label="Producto activo"
+              checked={productoEditar.activo || false}
               onChange={manejoCambioInputEdicion}
             />
           </Form.Group>
@@ -106,7 +115,7 @@ const ModalEdicionProducto = ({
             deshabilitado
           }
         >
-          Actualizar
+          {deshabilitado ? "Actualizando..." : "Actualizar"}
         </Button>
       </Modal.Footer>
     </Modal>

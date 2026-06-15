@@ -9,7 +9,7 @@ const ModalEliminacionProducto = ({
 }) => {
   const [deshabilitado, setDeshabilitado] = useState(false);
 
-  const handlEliminar = async () => {
+  const handleEliminar = async () => {
     if (deshabilitado) return;
 
     setDeshabilitado(true);
@@ -34,8 +34,8 @@ const ModalEliminacionProducto = ({
       </Modal.Header>
 
       <Modal.Body>
-        ¿Estás seguro de que deseas eliminar el producto "
-        <strong>{producto?.nombre || "Sin nombre"}</strong>"?
+        ¿Estás seguro de que deseas eliminar el producto{" "}
+        <strong>{producto?.nombre || "Sin nombre"}</strong>?
       </Modal.Body>
 
       <Modal.Footer>
@@ -48,10 +48,10 @@ const ModalEliminacionProducto = ({
 
         <Button
           variant="danger"
-          onClick={handlEliminar}
+          onClick={handleEliminar}
           disabled={deshabilitado || !producto}
         >
-          Eliminar
+          {deshabilitado ? "Eliminando..." : "Eliminar"}
         </Button>
       </Modal.Footer>
     </Modal>

@@ -11,7 +11,7 @@ const TarjetasProductos = ({
   const [idTarjetaActiva, setIdTarjetaActiva] = useState(null);
 
   useEffect(() => {
-    setCargando(!(productos && productos.length > 0));
+    setCargando(!productos);
   }, [productos]);
 
   const manejarTeclaEscape = useCallback((evento) => {
@@ -33,6 +33,10 @@ const TarjetasProductos = ({
         <div className="text-center my-5">
           <h5>Cargando productos...</h5>
           <Spinner animation="border" variant="success" role="status" />
+        </div>
+      ) : productos.length === 0 ? (
+        <div className="text-center my-5">
+          <p className="text-muted">No hay productos registrados.</p>
         </div>
       ) : (
         <div>
@@ -89,9 +93,21 @@ const TarjetasProductos = ({
                         Compra: C$ {producto.precio_compra}
                       </div>
 
-                      <div className="small">
+                      <Button
+                        variant={producto.activo ? "success" : "secondary"}
+                        size="sm"
+                        disabled
+                        className="mt-1 px-2"
+                      >
+                        <i
+                          className={`bi ${
+                            producto.activo
+                              ? "bi-check-circle-fill"
+                              : "bi-x-circle-fill"
+                          } me-1`}
+                        ></i>
                         {producto.activo ? "Activo" : "Inactivo"}
-                      </div>
+                      </Button>
                     </Col>
                   </Row>
                 </Card.Body>
