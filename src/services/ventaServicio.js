@@ -42,6 +42,10 @@ export const ventaServicio = {
           apellido1,
           cedula
         ),
+        empleados(
+          nombre_empleado,
+          apellido_empleado
+        ),
         detalles_ventas (
           id_detalle,
           producto_id,

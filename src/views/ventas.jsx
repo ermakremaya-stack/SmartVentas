@@ -1,7 +1,7 @@
 // src/views/Ventas.jsx
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Button, Spinner } from "react-bootstrap";
-import { useVentas } from "@/hooks";
+import { useVentas, usePDFGenerator } from "@/hooks";
 
 import NotificacionOperacion from "../components/NotificationOperation";
 import CuadroBusquedas from "../components/busquedas/CuadroBusquedas";
@@ -24,6 +24,10 @@ const Ventas = () => {
   // Estados locales de control de la UI
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [ventaAEditar, setVentaAEditar] = useState(null);
+
+  // Importamos el generador de PDF
+  const { generateReceiptPDF, isGenerating } = usePDFGenerator();
+
 
   const [clienteSeleccionado, setClienteSeleccionado] = useState(null);
   const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState(null);
@@ -152,6 +156,10 @@ const Ventas = () => {
     }
   };
 
+  const handleDescargarRecibo = (venta) => {
+    generateReceiptPDF(venta, `recibo_venta_#${venta.id_venta}.pdf`);
+  };
+
   return (
     <Container fluid className="py-4">
       <NotificacionOperacion
@@ -192,7 +200,7 @@ const Ventas = () => {
             <TablaVentas
               ventas={ventasPaginadas}
               abrirModalEdicion={abrirEdicion}
-              generarPDFVenta={() => { }}
+              generarPDFVenta={handleDescargarRecibo}
             />
           </div>
 
@@ -201,7 +209,7 @@ const Ventas = () => {
             <TarjetaVenta
               ventas={ventasPaginadas}
               abrirModalEdicion={abrirEdicion}
-              generarPDFVenta={() => { }}
+              generarPDFVenta={handleDescargarRecibo}
             />
           </div>
 
