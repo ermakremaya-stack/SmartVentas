@@ -8,8 +8,8 @@ export const TablaClientes = ({
   generarPDFCliente,
 }) => {
   return (
-    <Table striped bordered hover responsive size="sm" className="shadow-sm">
-      <thead className="table-dark">
+    <Table striped borderless hover responsive size="sm">
+      <thead>
         <tr>
           <th>ID</th>
           <th>Nombre Completo</th>
@@ -29,17 +29,15 @@ export const TablaClientes = ({
             <td>{cliente.cedula}</td>
             <td>{cliente.ciudad}</td>
             <td className="text-center">
-              {cliente.activo ? (
-                <Badge bg="success"><i className="bi bi-check-circle me-1"></i> Activo</Badge>
-              ) : (
-                <Badge bg="secondary"><i className="bi bi-x-circle me-1"></i> Inactivo</Badge>
-              )}
+              <span className={`badge bg-${cliente.activo ? "success" : "secondary"}`}>
+                {cliente.activo ? "activo" : "inactivo"}
+              </span>
             </td>
-            <td className="text-center">
+            <td className="text-center text-nowrap">
               <Button
                 variant="outline-warning"
                 size="sm"
-                className="me-2"
+                className="m-1"
                 onClick={() => abrirModalEdicion(cliente)}
                 title="Editar Cliente"
               >
@@ -49,7 +47,7 @@ export const TablaClientes = ({
               <Button
                 variant="outline-danger"
                 size="sm"
-                className="me-2"
+                className="m-1"
                 onClick={() => abrirModalEliminacion(cliente)}
                 title="Eliminar Cliente"
               >
@@ -59,6 +57,7 @@ export const TablaClientes = ({
               <Button
                 variant="outline-primary"
                 size="sm"
+                className="m-1"
                 onClick={() => generarPDFCliente(cliente)}
                 title="Exportar Ficha PDF"
               >
