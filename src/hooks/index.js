@@ -13,3 +13,4 @@ export { useClientes } from './useClientes.js'
  * @exports useVentas 
  */
 export { useVentas } from './useVentas.js'
+export * from './usePDFGenerator.js';

@@ -13,3 +13,5 @@ export { clienteServicio } from './clienteServicio.js'
  * @exports ventaServicio 
  */
 export { ventaServicio } from './ventaServicio.js'
+
+export * from './analyticsService.js';
