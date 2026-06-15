@@ -76,16 +76,17 @@ const Clientes = () => {
 
   return (
     <Container className="mt-3">
-      <Row className="align-items-center mb-3">
-        <Col xs={9} sm={7} md={7} lg={7} className="d-flex align-items-center">
-          <h3 className="mb-0">
+      {/* Cabecera controlada para evitar saltos de línea destructivos en responsive */}
+      <Row className="align-items-center justify-content-between mb-3 g-2">
+        <Col xs="auto" className="flex-grow-1 min-w-0">
+          <h3 className="text-dark fw-bold mb-0 text-truncate fs-4 fs-md-3">
             <i className="bi bi-people-fill me-2 text-primary"></i> Directorio de Clientes
           </h3>
         </Col>
-        <Col xs={3} sm={5} md={5} lg={5} className="text-end">
-          <Button onClick={() => setMostrarModal(true)} variant="primary" size="md">
+        <Col xs="auto" className="text-end">
+          <Button onClick={() => setMostrarModal(true)} variant="primary" className="d-flex align-items-center">
             <i className="bi bi-person-plus-fill"></i>
-            <span className="d-none d-sm-inline ms-2">Nuevo Cliente</span>
+            <span className="d-none d-md-inline ms-2">Nuevo Cliente</span>
           </Button>
         </Col>
       </Row>

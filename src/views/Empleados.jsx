@@ -175,13 +175,17 @@ const Empleados = () => {
 
   return (
     <Container className="mt-3">
-      <Row className="align-items-center mb-3">
-        <Col>
-          <h3><i className="bi-person-badge-fill me-2"></i>Empleados</h3>
+      {/* Cabecera optimizada para evitar saltos de línea indeseados en móviles */}
+      <Row className="align-items-center justify-content-between mb-3 g-2">
+        <Col xs="auto" className="flex-grow-1 min-w-0">
+          <h3 className="text-dark fw-bold mb-0 text-truncate fs-4 fs-md-3">
+            <i className="bi-person-badge-fill me-2"></i>Empleados
+          </h3>
         </Col>
-        <Col className="text-end">
-          <Button onClick={() => setMostrarModal(true)}>
-            <i className="bi-plus-lg me-1"></i>Nuevo Empleado
+        <Col xs="auto" className="text-end">
+          <Button onClick={() => setMostrarModal(true)} className="d-flex align-items-center">
+            <i className="bi-plus-lg"></i>
+            <span className="d-none d-md-inline ms-1">Nuevo Empleado</span>
           </Button>
         </Col>
       </Row>

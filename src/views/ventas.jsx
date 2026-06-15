@@ -53,7 +53,7 @@ const Ventas = () => {
         const nombreCliente = `${v.clientes?.nombre1 || ""} ${v.clientes?.apellido1 || ""}`.toLowerCase();
         // Fallback por si la tabla empleados maneja nombre_empleado o nombre completo
         const nombreEmpleado = `${v.empleados?.nombre_empleado || ""} ${v.empleados?.apellido_empleado || ""}`.toLowerCase();
-        
+
         return nombreCliente.includes(textoLower) || nombreEmpleado.includes(textoLower);
       });
       setVentasFiltradas(filtradas);
@@ -74,7 +74,7 @@ const Ventas = () => {
   // Función de Edición robusta y sincronizada con el servicio unificado
   const abrirEdicion = (venta) => {
     setVentaAEditar(venta);
-    
+
     const cliente = clientes.find(c => c.cliente_id === venta.cliente_id);
     const empleado = empleados.find(e => e.id_empleado === venta.id_empleado);
 
@@ -130,7 +130,7 @@ const Ventas = () => {
 
   const actualizarCantidad = (idProducto, nuevaCantidad) => {
     if (nuevaCantidad < 1) return;
-    setDetalles(prev => prev.map(d => 
+    setDetalles(prev => prev.map(d =>
       d.producto_id === idProducto ? { ...d, cantidad: nuevaCantidad } : d
     ));
   };
@@ -154,29 +154,30 @@ const Ventas = () => {
 
   return (
     <Container fluid className="py-4">
-      <NotificacionOperacion 
-        mostrar={toast.mostrar} 
-        mensaje={toast.mensaje} 
-        tipo={toast.tipo} 
-        onCerrar={() => setToast({ ...toast, mostrar: false })} 
+      <NotificacionOperacion
+        mostrar={toast.mostrar}
+        mensaje={toast.mensaje}
+        tipo={toast.tipo}
+        onCerrar={() => setToast({ ...toast, mostrar: false })}
       />
 
       <Row className="mb-4 align-items-center">
-        <Col>
-          <h2 className="text-dark fw-bold mb-0">
+        <Col xs="auto" className="flex-grow-1 min-w-0">
+          <h2 className="text-dark fw-bold mb-0 text-truncate fs-4 fs-md-2">
             <i className="bi bi-cash-coin text-primary me-2"></i> Control de Ventas
           </h2>
         </Col>
         <Col className="text-end">
           <Button variant="primary" onClick={abrirNuevaVenta}>
-            <i className="bi bi-plus-lg me-1"></i> Nueva Venta
+            <i className="bi bi-plus-lg"></i>
+            <span className="d-none d-md-inline ms-1">Nueva Venta</span>
           </Button>
         </Col>
       </Row>
 
-      <CuadroBusquedas 
-        textoBusqueda={textoBusqueda} 
-        manejarCambioBusqueda={(e) => setTextoBusqueda(e.target.value)} 
+      <CuadroBusquedas
+        textoBusqueda={textoBusqueda}
+        manejarCambioBusqueda={(e) => setTextoBusqueda(e.target.value)}
       />
 
       {cargando ? (
@@ -188,27 +189,27 @@ const Ventas = () => {
         <>
           {/* Vista Escritorio */}
           <div className="d-none d-md-block">
-            <TablaVentas 
-              ventas={ventasPaginadas} 
-              abrirModalEdicion={abrirEdicion} 
-              generarPDFVenta={() => {}} 
+            <TablaVentas
+              ventas={ventasPaginadas}
+              abrirModalEdicion={abrirEdicion}
+              generarPDFVenta={() => { }}
             />
           </div>
 
           {/* Vista Móvil */}
           <div className="d-md-none">
-            <TarjetaVenta 
-              ventas={ventasPaginadas} 
-              abrirModalEdicion={abrirEdicion} 
-              generarPDFVenta={() => {}} 
+            <TarjetaVenta
+              ventas={ventasPaginadas}
+              abrirModalEdicion={abrirEdicion}
+              generarPDFVenta={() => { }}
             />
           </div>
 
-          <Paginacion 
-            totalRegistros={ventasFiltradas.length} 
-            registrosPorPagina={registrosPorPagina} 
-            paginaActual={paginaActual} 
-            establecerPaginaActual={establecerPaginaActual} 
+          <Paginacion
+            totalRegistros={ventasFiltradas.length}
+            registrosPorPagina={registrosPorPagina}
+            paginaActual={paginaActual}
+            establecerPaginaActual={establecerPaginaActual}
             establecerRegistrosPorPagina={establecerRegistrosPorPagina}
           />
         </>
@@ -234,7 +235,7 @@ const Ventas = () => {
         actualizarCantidad={actualizarCantidad}
         guardarVenta={handleGuardarVenta}
         ventaAEditar={ventaAEditar}
-        cerrarVenta={cerrarVenta}      
+        cerrarVenta={cerrarVenta}
       />
     </Container>
   );

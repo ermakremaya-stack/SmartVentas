@@ -128,7 +128,7 @@ const Encabezado = () => {
               onClick={() => manejarNavegacion("/ventas")}
               className={mostrarMenu ? "color-texto-marca" : "text-white"}
             >
-              {mostrarMenu && <i className="bi-market-fill me-2"></i>}
+              {mostrarMenu && <i className="bi-cart-check-fill me-2"></i>}
               <strong>Ventas</strong>
             </Nav.Link>
 
