@@ -4,6 +4,7 @@ import { Modal, Row, Col, Form, Button, Table } from "react-bootstrap";
 const FormularioCompra = ({
   mostrar,
   setMostrar,
+  resetFormulario,
   proveedores = [],
   empleados = [],
   productos = [],
@@ -19,12 +20,25 @@ const FormularioCompra = ({
   setDetalles,
   totalCompra,
   guardarCompra,
-  compraAEditar
+  compraAEditar,
 }) => {
-
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [cantidad, setCantidad] = useState(1);
   const [precio, setPrecio] = useState(0);
+  const [deshabilitado, setDeshabilitado] = useState(false);
+
+  // ================= CERRAR MODAL =================
+  const cerrarModal = () => {
+    setMostrar(false);
+
+    if (resetFormulario) {
+      resetFormulario();
+    }
+
+    setProductoSeleccionado(null);
+    setCantidad(1);
+    setPrecio(0);
+  };
 
   // ================= IDS SEGUROS =================
   const obtenerIdProveedor = (proveedor) => {
@@ -45,13 +59,13 @@ const FormularioCompra = ({
 
     return String(
       proveedor?.nombre_proveedor ||
-      proveedor?.nombre ||
-      proveedor?.nombre_empresa ||
-      proveedor?.razon_social ||
-      proveedor?.empresa ||
-      proveedor?.nombre_contacto ||
-      proveedor?.contacto ||
-      `Proveedor ${idProveedor}`
+        proveedor?.nombre ||
+        proveedor?.nombre_empresa ||
+        proveedor?.razon_social ||
+        proveedor?.empresa ||
+        proveedor?.nombre_contacto ||
+        proveedor?.contacto ||
+        `Proveedor ${idProveedor}`
     );
   };
 
@@ -60,9 +74,11 @@ const FormularioCompra = ({
 
     return String(
       `${empleado?.nombre_empleado || empleado?.nombre || empleado?.nombre1 || ""} ${
-        empleado?.apellido_empleado || empleado?.apellido || empleado?.apellido1 || ""
-      }`.trim() ||
-      `Empleado ${idEmpleado}`
+        empleado?.apellido_empleado ||
+        empleado?.apellido ||
+        empleado?.apellido1 ||
+        ""
+      }`.trim() || `Empleado ${idEmpleado}`
     );
   };
 
@@ -71,9 +87,9 @@ const FormularioCompra = ({
 
     return String(
       producto?.nombre_producto ||
-      producto?.nombre ||
-      producto?.descripcion ||
-      `Producto ${idProducto}`
+        producto?.nombre ||
+        producto?.descripcion ||
+        `Producto ${idProducto}`
     );
   };
 
@@ -86,16 +102,19 @@ const FormularioCompra = ({
 
     const idProducto = obtenerIdProducto(productoSeleccionado);
 
-    setDetalles(prev => {
-      const existe = prev.find(p => Number(p.producto_id) === Number(idProducto));
+    setDetalles((prev) => {
+      const existe = prev.find(
+        (p) => Number(p.producto_id) === Number(idProducto)
+      );
 
       if (existe) {
-        return prev.map(p =>
+        return prev.map((p) =>
           Number(p.producto_id) === Number(idProducto)
             ? {
                 ...p,
                 cantidad: Number(p.cantidad) + Number(cantidad),
-                subtotal: (Number(p.cantidad) + Number(cantidad)) * Number(p.precio)
+                subtotal:
+                  (Number(p.cantidad) + Number(cantidad)) * Number(p.precio),
               }
             : p
         );
@@ -108,8 +127,8 @@ const FormularioCompra = ({
           nombre_producto: obtenerNombreProducto(productoSeleccionado),
           cantidad: Number(cantidad),
           precio: Number(precio),
-          subtotal: Number(cantidad) * Number(precio)
-        }
+          subtotal: Number(cantidad) * Number(precio),
+        },
       ];
     });
 
@@ -120,7 +139,9 @@ const FormularioCompra = ({
 
   // ================= ELIMINAR PRODUCTO =================
   const eliminarDetalle = (id) => {
-    setDetalles(prev => prev.filter(p => Number(p.producto_id) !== Number(id)));
+    setDetalles((prev) =>
+      prev.filter((p) => Number(p.producto_id) !== Number(id))
+    );
   };
 
   // ================= TOTAL =================
@@ -129,11 +150,31 @@ const FormularioCompra = ({
     0
   );
 
+  // ================= GUARDAR / ACTUALIZAR =================
+  const manejarGuardar = async () => {
+    if (deshabilitado) return;
+
+    setDeshabilitado(true);
+
+    try {
+      await guardarCompra();
+    } finally {
+      setDeshabilitado(false);
+    }
+  };
+
   return (
-    <Modal show={mostrar} onHide={() => setMostrar(false)} size="lg" centered>
+    <Modal
+      show={mostrar}
+      onHide={cerrarModal}
+      size="lg"
+      centered
+      backdrop="static"
+      keyboard={false}
+    >
       <Modal.Header closeButton>
         <Modal.Title>
-          {compraAEditar ? "Editar Compra" : "Nueva Compra"}
+          {compraAEditar ? "Actualizar Compra" : "Nueva Compra"}
         </Modal.Title>
       </Modal.Header>
 
@@ -151,7 +192,8 @@ const FormularioCompra = ({
                 }
                 onChange={(e) => {
                   const proveedor = proveedores.find(
-                    p => Number(obtenerIdProveedor(p)) === Number(e.target.value)
+                    (p) =>
+                      Number(obtenerIdProveedor(p)) === Number(e.target.value)
                   );
 
                   setProveedorSeleccionado(proveedor || null);
@@ -187,7 +229,7 @@ const FormularioCompra = ({
                 }
                 onChange={(e) => {
                   const emp = empleados.find(
-                    x => Number(obtenerIdEmpleado(x)) === Number(e.target.value)
+                    (x) => Number(obtenerIdEmpleado(x)) === Number(e.target.value)
                   );
 
                   setEmpleadoSeleccionado(emp || null);
@@ -218,7 +260,7 @@ const FormularioCompra = ({
               <Form.Label>Factura *</Form.Label>
               <Form.Control
                 value={numeroFacturaProveedor}
-                onChange={e => setNumeroFacturaProveedor(e.target.value)}
+                onChange={(e) => setNumeroFacturaProveedor(e.target.value)}
                 placeholder="Ej: FAC-00125"
               />
             </Form.Group>
@@ -230,7 +272,7 @@ const FormularioCompra = ({
               <Form.Control
                 type="datetime-local"
                 value={fechaCompra}
-                onChange={e => setFechaCompra(e.target.value)}
+                onChange={(e) => setFechaCompra(e.target.value)}
               />
             </Form.Group>
           </Col>
@@ -251,7 +293,7 @@ const FormularioCompra = ({
               }
               onChange={(e) => {
                 const prod = productos.find(
-                  p => Number(obtenerIdProducto(p)) === Number(e.target.value)
+                  (p) => Number(obtenerIdProducto(p)) === Number(e.target.value)
                 );
 
                 setProductoSeleccionado(prod || null);
@@ -319,20 +361,25 @@ const FormularioCompra = ({
           </Col>
 
           <Col md={3} className="d-flex align-items-end">
-            <Button onClick={agregarDetalle} className="w-100">
+            <Button
+              onClick={agregarDetalle}
+              className="w-100"
+              disabled={!productoSeleccionado || cantidad <= 0 || precio <= 0}
+            >
+              <i className="bi bi-plus-lg me-1"></i>
               Agregar
             </Button>
           </Col>
         </Row>
 
-        <Table striped bordered size="sm">
+        <Table striped bordered size="sm" responsive>
           <thead>
             <tr>
               <th>Producto</th>
               <th>Cantidad</th>
               <th>Precio Unitario</th>
               <th>Subtotal</th>
-              <th></th>
+              <th className="text-center">Acción</th>
             </tr>
           </thead>
 
@@ -344,15 +391,18 @@ const FormularioCompra = ({
                   <td>{d.cantidad}</td>
                   <td>C$ {Number(d.precio || 0).toFixed(2)}</td>
                   <td>
-                    C$ {(Number(d.cantidad || 0) * Number(d.precio || 0)).toFixed(2)}
+                    C${" "}
+                    {(Number(d.cantidad || 0) * Number(d.precio || 0)).toFixed(
+                      2
+                    )}
                   </td>
-                  <td>
+                  <td className="text-center">
                     <Button
                       size="sm"
-                      variant="danger"
+                      variant="outline-danger"
                       onClick={() => eliminarDetalle(d.producto_id)}
                     >
-                      X
+                      <i className="bi bi-x-lg"></i>
                     </Button>
                   </td>
                 </tr>
@@ -373,19 +423,28 @@ const FormularioCompra = ({
       </Modal.Body>
 
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => setMostrar(false)}>
+        <Button variant="secondary" onClick={cerrarModal}>
           Cancelar
         </Button>
 
         <Button
-          onClick={guardarCompra}
+          variant={compraAEditar ? "warning" : "primary"}
+          onClick={manejarGuardar}
           disabled={
             !proveedorSeleccionado ||
             !empleadoSeleccionado ||
-            detalles.length === 0
+            !numeroFacturaProveedor.trim() ||
+            detalles.length === 0 ||
+            deshabilitado
           }
         >
-          {compraAEditar ? "Actualizar" : "Guardar"}
+          {deshabilitado
+            ? compraAEditar
+              ? "Actualizando..."
+              : "Guardando..."
+            : compraAEditar
+            ? "Actualizar"
+            : "Guardar"}
         </Button>
       </Modal.Footer>
     </Modal>

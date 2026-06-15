@@ -1,11 +1,12 @@
 import React from "react";
-import { Table, Spinner, Button, Badge } from "react-bootstrap";
+import { Table, Spinner, Button } from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
 const TablaProductos = ({
   productos,
   abrirModalEdicion,
   abrirModalEliminacion,
+  cambiarEstadoProducto,
 }) => {
   return (
     <>
@@ -55,14 +56,17 @@ const TablaProductos = ({
                   <Button
                     variant={producto.activo ? "success" : "secondary"}
                     size="sm"
-                    disabled
                     className="px-3"
+                    onClick={() => cambiarEstadoProducto(producto)}
+                    title={
+                      producto.activo
+                        ? "Clic para bloquear / inactivar producto"
+                        : "Clic para desbloquear / activar producto"
+                    }
                   >
                     <i
                       className={`bi ${
-                        producto.activo
-                          ? "bi-check-circle-fill"
-                          : "bi-x-circle-fill"
+                        producto.activo ? "bi-unlock-fill" : "bi-lock-fill"
                       } me-1`}
                     ></i>
                     {producto.activo ? "Activo" : "Inactivo"}
