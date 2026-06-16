@@ -86,11 +86,12 @@ const TarjetasProductos = ({
                       className="d-flex flex-column align-items-end justify-content-center text-end"
                     >
                       <div className="fw-semibold small">
-                        C$ {producto.precio_venta}
+                        C$ {Number(producto.precio_venta || 0).toFixed(2)}
                       </div>
 
                       <div className="small text-muted">
-                        Compra: C$ {producto.precio_compra}
+                        Compra: C${" "}
+                        {Number(producto.precio_compra || 0).toFixed(2)}
                       </div>
 
                       <Button

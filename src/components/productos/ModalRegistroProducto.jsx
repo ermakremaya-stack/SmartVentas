@@ -55,6 +55,8 @@ const ModalRegistroProducto = ({
               value={nuevoProducto?.categoria_id || ""}
               onChange={manejoCambioInput}
               placeholder="Ingresa el ID de la categoría"
+              min="1"
+              step="1"
             />
           </Form.Group>
 

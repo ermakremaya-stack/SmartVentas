@@ -55,6 +55,8 @@ const ModalEdicionProducto = ({
               value={productoEditar.categoria_id || ""}
               onChange={manejoCambioInputEdicion}
               placeholder="Ingresa el ID de la categoría"
+              min="1"
+              step="1"
             />
           </Form.Group>
 

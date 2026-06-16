@@ -45,11 +45,11 @@ const TablaProductos = ({
                 <td>{producto.categoria_id}</td>
 
                 <td className="d-none d-md-table-cell">
-                  C$ {producto.precio_compra}
+                  C$ {Number(producto.precio_compra || 0).toFixed(2)}
                 </td>
 
                 <td className="d-none d-md-table-cell">
-                  C$ {producto.precio_venta}
+                  C$ {Number(producto.precio_venta || 0).toFixed(2)}
                 </td>
 
                 <td className="d-none d-md-table-cell">
@@ -60,8 +60,8 @@ const TablaProductos = ({
                     onClick={() => cambiarEstadoProducto(producto)}
                     title={
                       producto.activo
-                        ? "Clic para bloquear / inactivar producto"
-                        : "Clic para desbloquear / activar producto"
+                        ? "Clic para inactivar producto"
+                        : "Clic para activar producto"
                     }
                   >
                     <i
