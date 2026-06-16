@@ -136,21 +136,59 @@ const Productos = () => {
   }, []);
 
   const manejoCambioInput = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, checked } = e.target;
 
-    setNuevoProducto((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setNuevoProducto((prev) => {
+      if (name === "nombre") {
+        return { ...prev, nombre: value };
+      }
+
+      if (name === "categoria_id") {
+        return { ...prev, categoria_id: value };
+      }
+
+      if (name === "precio_compra") {
+        return { ...prev, precio_compra: value };
+      }
+
+      if (name === "precio_venta") {
+        return { ...prev, precio_venta: value };
+      }
+
+      if (name === "activo") {
+        return { ...prev, activo: checked };
+      }
+
+      return prev;
+    });
   };
 
   const manejoCambioInputEdicion = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, checked } = e.target;
 
-    setProductoEditar((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    setProductoEditar((prev) => {
+      if (name === "nombre") {
+        return { ...prev, nombre: value };
+      }
+
+      if (name === "categoria_id") {
+        return { ...prev, categoria_id: value };
+      }
+
+      if (name === "precio_compra") {
+        return { ...prev, precio_compra: value };
+      }
+
+      if (name === "precio_venta") {
+        return { ...prev, precio_venta: value };
+      }
+
+      if (name === "activo") {
+        return { ...prev, activo: checked };
+      }
+
+      return prev;
+    });
   };
 
   const agregarProducto = async () => {
@@ -272,6 +310,46 @@ const Productos = () => {
     }
   };
 
+  const cambiarEstadoProducto = async (producto) => {
+    try {
+      const nuevoEstado = !producto.activo;
+
+      const { error } = await supabase
+        .from("productos")
+        .update({
+          activo: nuevoEstado,
+        })
+        .eq("producto_id", producto.producto_id);
+
+      if (error) {
+        console.error("Error al cambiar estado:", error.message);
+        setToast({
+          mostrar: true,
+          mensaje: `Error al cambiar el estado de ${producto.nombre}.`,
+          tipo: "error",
+        });
+        return;
+      }
+
+      await cargarProductos();
+
+      setToast({
+        mostrar: true,
+        mensaje: `Producto ${producto.nombre} ${
+          nuevoEstado ? "activado" : "inactivado"
+        } exitosamente.`,
+        tipo: "exito",
+      });
+    } catch (err) {
+      console.error("Excepción al cambiar estado:", err.message);
+      setToast({
+        mostrar: true,
+        mensaje: "Error inesperado al cambiar estado del producto.",
+        tipo: "error",
+      });
+    }
+  };
+
   const eliminarProducto = async () => {
     if (!productoAEliminar) return;
 
@@ -385,6 +463,7 @@ const Productos = () => {
               productos={productosPaginados}
               abrirModalEdicion={abrirModalEdicion}
               abrirModalEliminacion={abrirModalEliminacion}
+              cambiarEstadoProducto={cambiarEstadoProducto}
             />
           </Col>
         </Row>
