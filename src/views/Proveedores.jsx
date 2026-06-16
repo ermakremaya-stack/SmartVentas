@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from "../database/supabaseconfig";
+import "../App.css";
+import TablaProveedores from '../components/proveedor/TablaProveedores';
 
 const Proveedores = () => {
   const [proveedores, setProveedores] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [editandoId, setEditandoId] = useState(null);
+  const [mostrarModal, setMostrarModal] = useState(false);
   const [formData, setFormData] = useState({
     nombre_empresa: '', telefono: '', email: '', direccion: ''
   });
@@ -19,6 +22,12 @@ const Proveedores = () => {
       setProveedores(data || []);
     } catch (error) { console.error('Error:', error.message); }
     finally { setCargando(false); }
+  };
+
+  const handleNuevoClick = () => {
+    setFormData({ nombre_empresa: '', telefono: '', email: '', direccion: '' });
+    setEditandoId(null);
+    setMostrarModal(true);
   };
 
   const handleChange = (e) => {
@@ -45,6 +54,7 @@ const Proveedores = () => {
         alert('¡Registrado!');
       }
       setFormData({ nombre_empresa: '', telefono: '', email: '', direccion: '' });
+      setMostrarModal(false);
       cargarProveedores();
     } catch (error) { alert('Error: ' + error.message); }
   };
@@ -52,6 +62,7 @@ const Proveedores = () => {
   const handleEditClick = (prov) => {
     setEditandoId(prov.proveedor_id);
     setFormData({ nombre_empresa: prov.nombre_empresa, telefono: prov.telefono, email: prov.email || '', direccion: prov.direccion || '' });
+    setMostrarModal(true);
   };
 
   const handleDesactivar = async (id) => {
@@ -67,44 +78,41 @@ const Proveedores = () => {
 
   return (
     <div className="container mt-4 text-start">
-      <h2 className="mb-4">Módulo de Proveedores</h2>
-
-      {/* AQUÍ ESTÁ EL FORMULARIO QUE HACÍA FALTA */}
-      <div className="card p-4 shadow-sm mb-5">
-        <h4 className="card-title">{editandoId ? 'Editar Proveedor' : 'Registrar un nuevo proveedor'}</h4>
-        <form onSubmit={handleSubmit} className="row g-3 mt-2">
-          <div className="col-md-6"><label className="form-label">Nombre</label><input type="text" className="form-control" name="nombre_empresa" value={formData.nombre_empresa} onChange={handleChange} required /></div>
-          <div className="col-md-6"><label className="form-label">Teléfono</label><input type="text" className="form-control" name="telefono" value={formData.telefono} onChange={handleChange} required /></div>
-          <div className="col-md-6"><label className="form-label">Email</label><input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} /></div>
-          <div className="col-md-6"><label className="form-label">Dirección</label><input type="text" className="form-control" name="direccion" value={formData.direccion} onChange={handleChange} /></div>
-          <div className="col-12 mt-4">
-            <button type="submit" className="btn btn-primary">{editandoId ? 'Actualizar' : 'Guardar'}</button>
-          </div>
-        </form>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Módulo de Proveedores</h2>
+        <button className="btn btn-primary" onClick={handleNuevoClick}>
+          + Nuevo Proveedor
+        </button>
       </div>
 
+      {/* --- MODAL --- */}
+      {mostrarModal && (
+        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog">
+            <div className="modal-content p-4">
+              <h4>{editandoId ? 'Editar Proveedor' : 'Registrar un nuevo proveedor'}</h4>
+              <form onSubmit={handleSubmit} className="row g-3 mt-2">
+                <div className="col-md-6"><label>Nombre</label><input className="form-control" name="nombre_empresa" value={formData.nombre_empresa} onChange={handleChange} required /></div>
+                <div className="col-md-6"><label>Teléfono</label><input className="form-control" name="telefono" value={formData.telefono} onChange={handleChange} required /></div>
+                <div className="col-md-6"><label>Email</label><input className="form-control" name="email" value={formData.email} onChange={handleChange} /></div>
+                <div className="col-md-6"><label>Dirección</label><input className="form-control" name="direccion" value={formData.direccion} onChange={handleChange} /></div>
+                <div className="d-flex justify-content-end mt-3">
+                  <button type="button" className="btn btn-secondary me-2" onClick={() => setMostrarModal(false)}>Cancelar</button>
+                  <button type="submit" className="btn btn-primary">{editandoId ? 'Actualizar' : 'Guardar'}</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="card p-4 shadow-sm">
-        <h4>Lista de Proveedores</h4>
-        <table className="table">
-          <thead><tr><th>Empresa</th><th>Teléfono</th><th>Estado</th><th>Acciones</th></tr></thead>
-          <tbody>
-            {proveedores.map((prov) => (
-              <tr key={prov.proveedor_id} className={!prov.activo ? "table-secondary" : ""}>
-                <td>{prov.nombre_empresa}</td>
-                <td>{prov.telefono}</td>
-                <td>{prov.activo ? <span className="badge bg-success">Activo</span> : <span className="badge bg-secondary">Inactivo</span>}</td>
-                <td>
-                  <button className="btn btn-sm btn-outline-primary me-2" onClick={() => handleEditClick(prov)}>Editar</button>
-                  {prov.activo ? (
-                    <button className="btn btn-sm btn-outline-warning" onClick={() => handleDesactivar(prov.proveedor_id)}>Desactivar</button>
-                  ) : (
-                    <button className="btn btn-sm btn-outline-success" onClick={() => handleActivar(prov.proveedor_id)}>Activar</button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <TablaProveedores
+          proveedores={proveedores}
+          handleEditClick={handleEditClick}
+          handleDesactivar={handleDesactivar}
+          handleActivar={handleActivar}
+        />
       </div>
     </div>
   );
